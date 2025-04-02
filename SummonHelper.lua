@@ -66,17 +66,22 @@ local function DoSummon(name)
     
     CreateMacro(macroName, macroIcon, macroText, false)
     
+    -- If an existing button exists, hide it
     if _G["SummonHelperQuickButton"] then
         _G["SummonHelperQuickButton"]:Hide()
     end
     
+    -- Create a secure button that works properly
     local secureButton = CreateFrame("Button", "SummonHelperQuickButton", UIParent, "SecureActionButtonTemplate")
     secureButton:SetSize(200, 30)
-    secureButton:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    
+    -- Position the button above the top right of the main frame
+    secureButton:SetPoint("BOTTOM", frame, "TOPRIGHT", -100, 10)
     
     secureButton:SetAttribute("type", "macro")
     secureButton:SetAttribute("macrotext", macroText)
     
+    -- Make the button look nice with the standard button template
     local ntex = secureButton:CreateTexture()
     ntex:SetTexture("Interface/Buttons/UI-Panel-Button-Up")
     ntex:SetTexCoord(0, 0.625, 0, 0.6875)
@@ -95,10 +100,12 @@ local function DoSummon(name)
     ptex:SetAllPoints()
     secureButton:SetPushedTexture(ptex)
     
+    -- Add text to the button (AFTER setting textures)
     secureButton:SetNormalFontObject("GameFontNormal")
     secureButton:SetHighlightFontObject("GameFontHighlight")
     secureButton:SetText("Summon " .. name)
     
+    -- Add a close button
     local closeButton = CreateFrame("Button", nil, secureButton, "UIPanelCloseButton")
     closeButton:SetSize(20, 20)
     closeButton:SetPoint("TOPRIGHT", secureButton, "TOPRIGHT", 2, 2)
@@ -106,11 +113,13 @@ local function DoSummon(name)
         secureButton:Hide() 
     end)
     
-    secureButton:SetMovable(true)
+    -- Make button movable
+    secureButton:SetMovable(false)
     secureButton:SetClampedToScreen(true)
     secureButton:EnableMouse(true)
     secureButton:RegisterForDrag("LeftButton")
     
+    -- We need an overlay frame to handle dragging since we can't use scripts on secure buttons
     local moverFrame = CreateFrame("Frame", nil, secureButton)
     moverFrame:SetPoint("TOPLEFT", secureButton, "TOPLEFT", 0, 0)
     moverFrame:SetPoint("BOTTOMRIGHT", secureButton, "BOTTOMRIGHT", 0, 0)
@@ -119,7 +128,6 @@ local function DoSummon(name)
     moverFrame:SetFrameLevel(secureButton:GetFrameLevel() + 10)
     moverFrame:SetScript("OnDragStart", function() secureButton:StartMoving() end)
     moverFrame:SetScript("OnDragStop", function() secureButton:StopMovingOrSizing() end)
-    
     moverFrame:SetHitRectInsets(5, 5, 5, 5)
     
     moverFrame:SetScript("OnEnter", function()
@@ -133,6 +141,8 @@ local function DoSummon(name)
         GameTooltip:Hide()
     end)
     
+    SendChatMessage("Summoning " .. name .. "! Two people need to click the portal.", channel)
+    
     -- Auto-hide after 20 seconds
     C_Timer.After(20, function() 
         if secureButton and secureButton:IsShown() then
@@ -140,7 +150,6 @@ local function DoSummon(name)
         end
     end)
     
-    -- SendChatMessage("SummonHelper: Summoning " .. name .. "! Two people need to click the portal.", channel)
 end
 
 local function UpdateRaidList()
