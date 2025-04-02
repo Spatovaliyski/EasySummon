@@ -67,89 +67,76 @@ local function DoSummon(name)
     CreateMacro(macroName, macroIcon, macroText, false)
     
     -- If an existing button exists, hide it
-    if _G["SummonHelperQuickButton"] then
-        _G["SummonHelperQuickButton"]:Hide()
+    if secureSummonButton then
+        secureSummonButton:Hide()  -- Hide the previous secure button
+        secureSummonButton = nil   -- Delete the reference to the old button
     end
     
-    -- Create a secure button that works properly
-    local secureButton = CreateFrame("Button", "SummonHelperQuickButton", UIParent, "SecureActionButtonTemplate")
-    secureButton:SetSize(200, 30)
+    -- Create a new secure button
+    secureSummonButton = CreateFrame("Button", "SummonHelperQuickButton", UIParent, "SecureActionButtonTemplate, UIPanelButtonTemplate")
+    secureSummonButton:SetSize(200, 40)
+    secureSummonButton:SetPoint("BOTTOM", frame, "TOPRIGHT", -100, 10)
+    secureSummonButton:SetAttribute("type", "macro")
+    secureSummonButton:SetAttribute("macrotext", macroText)
     
-    -- Position the button above the top right of the main frame
-    secureButton:SetPoint("BOTTOM", frame, "TOPRIGHT", -100, 10)
-    
-    secureButton:SetAttribute("type", "macro")
-    secureButton:SetAttribute("macrotext", macroText)
-    
-    -- Make the button look nice with the standard button template
-    local ntex = secureButton:CreateTexture()
-    ntex:SetTexture("Interface/Buttons/UI-Panel-Button-Up")
-    ntex:SetTexCoord(0, 0.625, 0, 0.6875)
-    ntex:SetAllPoints()
-    secureButton:SetNormalTexture(ntex)
-    
-    local htex = secureButton:CreateTexture()
-    htex:SetTexture("Interface/Buttons/UI-Panel-Button-Highlight")
-    htex:SetTexCoord(0, 0.625, 0, 0.6875)
-    htex:SetAllPoints()
-    secureButton:SetHighlightTexture(htex)
-    
-    local ptex = secureButton:CreateTexture()
-    ptex:SetTexture("Interface/Buttons/UI-Panel-Button-Down")
-    ptex:SetTexCoord(0, 0.625, 0, 0.6875)
-    ptex:SetAllPoints()
-    secureButton:SetPushedTexture(ptex)
-    
-    -- Add text to the button (AFTER setting textures)
-    secureButton:SetNormalFontObject("GameFontNormal")
-    secureButton:SetHighlightFontObject("GameFontHighlight")
-    secureButton:SetText("Summon " .. name)
+    -- Set the text directly using the button's text property
+    secureSummonButton:SetText("Summon " .. name)
     
     -- Add a close button
-    local closeButton = CreateFrame("Button", nil, secureButton, "UIPanelCloseButton")
+    local closeButton = CreateFrame("Button", nil, secureSummonButton, "UIPanelCloseButton")
     closeButton:SetSize(20, 20)
-    closeButton:SetPoint("TOPRIGHT", secureButton, "TOPRIGHT", 2, 2)
+    closeButton:SetPoint("TOPRIGHT", secureSummonButton, "TOPRIGHT", 2, 2)
     closeButton:SetScript("OnClick", function() 
-        secureButton:Hide() 
+        secureSummonButton:Hide() 
+        secureSummonButton = nil  -- Clean up the button reference when closed
     end)
     
-    -- Make button movable
-    secureButton:SetMovable(false)
-    secureButton:SetClampedToScreen(true)
-    secureButton:EnableMouse(true)
-    secureButton:RegisterForDrag("LeftButton")
+    -- Make the button movable
+    secureSummonButton:SetMovable(true)
+    secureSummonButton:SetClampedToScreen(true)
     
-    -- We need an overlay frame to handle dragging since we can't use scripts on secure buttons
-    local moverFrame = CreateFrame("Frame", nil, secureButton)
-    moverFrame:SetPoint("TOPLEFT", secureButton, "TOPLEFT", 0, 0)
-    moverFrame:SetPoint("BOTTOMRIGHT", secureButton, "BOTTOMRIGHT", 0, 0)
+    -- Create a separate frame for dragging that doesn't block clicks
+    local moverFrame = CreateFrame("Frame", nil, secureSummonButton)
+    moverFrame:SetFrameLevel(secureSummonButton:GetFrameLevel() + 10)
+    
+    -- Make the mover frame only cover the top bar area of the button
+    moverFrame:SetPoint("TOPLEFT", secureSummonButton, "TOPLEFT", 20, 0)  -- Avoid the close button
+    moverFrame:SetPoint("TOPRIGHT", secureSummonButton, "TOPRIGHT", -20, 0)
+    moverFrame:SetHeight(15)  -- Just the top portion for dragging
+    
     moverFrame:EnableMouse(true)
     moverFrame:RegisterForDrag("LeftButton")
-    moverFrame:SetFrameLevel(secureButton:GetFrameLevel() + 10)
-    moverFrame:SetScript("OnDragStart", function() secureButton:StartMoving() end)
-    moverFrame:SetScript("OnDragStop", function() secureButton:StopMovingOrSizing() end)
-    moverFrame:SetHitRectInsets(5, 5, 5, 5)
+    moverFrame:SetScript("OnDragStart", function() secureSummonButton:StartMoving() end)
+    moverFrame:SetScript("OnDragStop", function() secureSummonButton:StopMovingOrSizing() end)
     
-    moverFrame:SetScript("OnEnter", function()
-        GameTooltip:SetOwner(secureButton, "ANCHOR_TOP")
+    -- Make it visible that this is the drag area
+    local dragTexture = moverFrame:CreateTexture(nil, "OVERLAY")
+    dragTexture:SetAllPoints()
+    dragTexture:SetColorTexture(0.4, 0.4, 0.4, 0.1)
+    
+    
+    -- Add a tooltip to the button itself
+    secureSummonButton:HookScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
         GameTooltip:AddLine("Click to summon " .. name)
         GameTooltip:AddLine("This will target them and cast Ritual of Summoning", 1, 1, 1)
         GameTooltip:Show()
     end)
     
-    moverFrame:SetScript("OnLeave", function()
+    secureSummonButton:HookScript("OnLeave", function()
         GameTooltip:Hide()
     end)
     
-    SendChatMessage("Summoning " .. name .. "! Two people need to click the portal.", channel)
+    -- Announce the summon when clicked
+    SendChatMessage("Summoning " .. name .. ", please click!", channel)
     
     -- Auto-hide after 20 seconds
     C_Timer.After(20, function() 
-        if secureButton and secureButton:IsShown() then
-            secureButton:Hide()
+        if secureSummonButton and secureSummonButton:IsShown() then
+            secureSummonButton:Hide()
+            secureSummonButton = nil  -- Clean up the button reference when hidden
         end
     end)
-    
 end
 
 local function UpdateRaidList()
@@ -196,7 +183,7 @@ local function UpdateRaidList()
                 local summonButton = CreateFrame("Button", nil, buttonFrame, "UIPanelButtonTemplate")
                 summonButton:SetSize(80, 20)
                 summonButton:SetPoint("RIGHT", -10, 0)
-                summonButton:SetText("Summon")
+                summonButton:SetText("Target")
                 summonButton:SetFrameLevel(buttonFrame:GetFrameLevel() + 1)
                 summonButton:SetScript("OnClick", function()
                     DoSummon(name)
@@ -304,6 +291,7 @@ SLASH_SUMMONHELPER2 = "/summonhelper"
 SlashCmdList["SUMMONHELPER"] = function()
     if frame:IsShown() then
         frame:Hide()
+        secureSummonButton:Hide()
     else
         frame:Show()
         UpdateRaidList()
