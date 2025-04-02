@@ -72,8 +72,8 @@ local function DoSummon(name)
         secureSummonButton = nil   -- Delete the reference to the old button
     end
     
-    -- Create a new secure button
-    secureSummonButton = CreateFrame("Button", "SummonHelperQuickButton", UIParent, "SecureActionButtonTemplate, UIPanelButtonTemplate")
+    -- Create a new secure button - fix template syntax error
+    secureSummonButton = CreateFrame("Button", "SummonHelperQuickButton", UIParent, "SecureActionButtonTemplate,UIPanelButtonTemplate")
     secureSummonButton:SetSize(200, 40)
     secureSummonButton:SetPoint("BOTTOM", frame, "TOPRIGHT", -100, 10)
     secureSummonButton:SetAttribute("type", "macro")
@@ -114,16 +114,26 @@ local function DoSummon(name)
     dragTexture:SetAllPoints()
     dragTexture:SetColorTexture(0.4, 0.4, 0.4, 0.1)
     
+    -- Add tooltip to the mover frame
+    moverFrame:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(moverFrame, "ANCHOR_TOP")
+        GameTooltip:AddLine("Drag from here to move the button")
+        GameTooltip:Show()
+    end)
     
-    -- Add a tooltip to the button itself
-    secureSummonButton:HookScript("OnEnter", function(self)
+    moverFrame:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+    
+    -- Add a tooltip to the button itself - properly handle secure template
+    secureSummonButton:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
         GameTooltip:AddLine("Click to summon " .. name)
         GameTooltip:AddLine("This will target them and cast Ritual of Summoning", 1, 1, 1)
         GameTooltip:Show()
     end)
     
-    secureSummonButton:HookScript("OnLeave", function()
+    secureSummonButton:SetScript("OnLeave", function()
         GameTooltip:Hide()
     end)
     
@@ -191,8 +201,8 @@ local function UpdateRaidList()
                 buttonFrame.summonButton = summonButton
 
                 local checkmark = buttonFrame:CreateFontString(nil, "OVERLAY", "GameFontGreen")
-                checkmark:SetPoint("RIGHT", summonButton, "LEFT", -5, 0)
-                checkmark:SetText("✅")
+                checkmark:SetPoint("LEFT", nameText, "RIGHT", 10, 0)  -- Moved here to the right of the nameText
+                checkmark:SetText("Requested")
                 checkmark:Hide()
                 buttonFrame.checkmark = checkmark
             
@@ -231,7 +241,8 @@ local function UpdateRaidList()
                 buttonFrame.nameText:SetTextColor(classColor.r, classColor.g, classColor.b, 1.0)
                 buttonFrame.summonButton:Show()
             end
-            
+
+
             -- Handle checkmark visibility (123 responders)
             if hasAnswered then
                 buttonFrame.checkmark:Show()
@@ -254,13 +265,23 @@ local function UpdateRaidList()
 end
 
 local function CheckForSummonRequest(_, event, msg, sender)
-    if (event == "CHAT_MSG_RAID" or event == "CHAT_MSG_RAID_LEADER" or event == "CHAT_MSG_RAID_WARNING") and msg == "123" then
+    -- Check for "123" message which is commonly used to request a summon
+    if (event == "CHAT_MSG_RAID" or event == "CHAT_MSG_RAID_LEADER" or 
+        event == "CHAT_MSG_RAID_WARNING" or event == "CHAT_MSG_PARTY" or 
+        event == "CHAT_MSG_PARTY_LEADER") and 
+        (msg == "123" or string.lower(msg):match("^123") or 
+         string.lower(msg):match("summon") or string.lower(msg):match("need%s+summ?on")) then
+        
+        -- Add the player to our responses list
         playerResponses[sender] = true
+        
+        -- Update the UI to show the checkmark
         UpdateRaidList()
     end
 end
 
 frame:RegisterEvent("GROUP_ROSTER_UPDATE")
+frame:RegisterEvent("CHAT_MSG_PARTY")
 frame:RegisterEvent("CHAT_MSG_RAID")
 frame:RegisterEvent("CHAT_MSG_RAID_LEADER")
 frame:RegisterEvent("CHAT_MSG_RAID_WARNING")
