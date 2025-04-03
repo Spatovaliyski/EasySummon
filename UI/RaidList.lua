@@ -169,7 +169,7 @@ function SummonHelperRaidList:CreateMemberButton(parent, index)
     local requestText = buttonFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     requestText:SetPoint("LEFT", nameText, "RIGHT", -15, 0)
     requestText:SetText("[Summon me]")
-    requestText:SetTextColor(0, 1, 0) -- Green color
+    requestText:SetTextColor(0, 1, 0) -- Green
     requestText:Hide()
     buttonFrame.requestText = requestText
     
@@ -189,10 +189,9 @@ function SummonHelperRaidList:CreateMemberButton(parent, index)
     separator:SetPoint("BOTTOMRIGHT", buttonFrame, "BOTTOMRIGHT", -10, 0)
     buttonFrame.separator = separator
     
-    -- Create context menu
+    -- Context menu
     buttonFrame:SetScript("OnMouseUp", function(self, button)
         if button == "RightButton" and playerResponses[member.name] then
-            -- Create and show the context menu
             local menu = {
                 { text = member.name, isTitle = true },
                 { text = "Clear summon status", 

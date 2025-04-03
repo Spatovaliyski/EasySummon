@@ -16,8 +16,6 @@ function SummonHelperGroupUtils:GetGroupMembers()
                 local unit = "raid" .. i
                 local memberIsInInstance = false
                 
-                -- In Classic, we need better logic to detect if a player is in an instance:
-                -- If they're in a different zone than you and you're not in an instance, they might be in an instance
                 local playerZone = GetRealZoneText()
                 local memberIsPlayer = (UnitIsUnit(unit, "player"))
                 
@@ -85,7 +83,6 @@ function SummonHelperGroupUtils:GetGroupMembers()
                 local playerZone = GetRealZoneText()
                 local memberZone = ""
                 
-                -- Try to get party member zone from tooltip scanning (unreliable but sometimes works)
                 GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
                 GameTooltip:SetUnit(unit)
                 for i = 1, GameTooltip:NumLines() do

@@ -124,11 +124,10 @@ end
 
 -- Global initialization
 local function InitializeAddon()
-  -- Create our global addon instance
   _G.SummonHelperCore = SummonHelper:New()
   print("|cFF33FF33SummonHelper:|r Core initialized")
   
-  -- Delay the UI initialization and first update
+  -- Delay UI init
   C_Timer.After(0.5, function()
       if SummonHelperUI and SummonHelperUI.Initialize then
           SummonHelperUI:Initialize()
