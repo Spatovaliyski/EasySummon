@@ -1,6 +1,14 @@
 ## Interface: 11506
 ## Title: Summon Helper
+## Notes: Helps Warlocks manage summons
 ## Author: Limitedby
 ## Version: 1.0
-## Notes: Helps manage raid summons.
-SummonHelper.lua
+## SavedVariables: SummonHelperDB
+
+Config.lua
+Utils\TextUtils.lua
+Utils\GroupUtils.lua
+Core.lua
+UI\MainFrame.lua
+UI\RaidList.lua
+UI\SummonButton.lua
