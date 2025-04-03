@@ -175,7 +175,7 @@ local function UpdateRaidList()
             local inRange = UnitInRange(unit)
             local meIsInInstance = IsInInstance() and UnitIsConnected(unit) and online
             local isInInstance = IsInInstance()
-            local hasAnswered = playerResponses[name] or false
+            local hasAnswered = playerResponses[name]
             
             local buttonFrame = raidList[visibleIndex]
             if not buttonFrame then
@@ -184,12 +184,14 @@ local function UpdateRaidList()
                 buttonFrame:SetFrameLevel(scrollChild:GetFrameLevel() + 1)
                 raidList[visibleIndex] = buttonFrame
 
+                -- Create the name text with smaller width to make room for indicators
                 local nameText = buttonFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
                 nameText:SetPoint("LEFT", 10, 0)
-                nameText:SetWidth(150)
+                nameText:SetWidth(250) -- Reduced from 150 to make room for indicators
                 nameText:SetJustifyH("LEFT")
                 buttonFrame.nameText = nameText
 
+                -- Create summon button on the right side
                 local summonButton = CreateFrame("Button", nil, buttonFrame, "UIPanelButtonTemplate")
                 summonButton:SetSize(80, 20)
                 summonButton:SetPoint("RIGHT", -10, 0)
@@ -199,12 +201,6 @@ local function UpdateRaidList()
                     DoSummon(name)
                 end)
                 buttonFrame.summonButton = summonButton
-
-                local checkmark = buttonFrame:CreateFontString(nil, "OVERLAY", "GameFontGreen")
-                checkmark:SetPoint("LEFT", nameText, "RIGHT", 10, 0)  -- Moved here to the right of the nameText
-                checkmark:SetText("Requested")
-                checkmark:Hide()
-                buttonFrame.checkmark = checkmark
             
                 local separator = buttonFrame:CreateTexture(nil, "BACKGROUND")
                 separator:SetHeight(1)
@@ -242,14 +238,12 @@ local function UpdateRaidList()
                 buttonFrame.summonButton:Show()
             end
 
-
-            -- Handle checkmark visibility (123 responders)
+            -- Handle checkmark and request text visibility (123 responders)
             if hasAnswered then
-                buttonFrame.checkmark:Show()
-                -- Always full opacity for players who responded
-                buttonFrame.nameText:SetTextColor(classColor.r, classColor.g, classColor.b, 1.0)
+                -- log the response for debugging
+                buttonFrame.nameText:SetText(displayText .. " - [Summon]")
             else
-                buttonFrame.checkmark:Hide()
+                buttonFrame.nameText:SetText(displayText)
             end
 
             -- Hide separator on the last item
@@ -264,7 +258,18 @@ local function UpdateRaidList()
     end
 end
 
+local function GetPlayerNameWithoutRealm(fullName)
+    return string.match(fullName, "([^%-]+)")  -- Extracts the player name before the dash
+end
+
 local function CheckForSummonRequest(_, event, msg, sender)
+    -- Initialize playerResponses if it's nil
+    if not playerResponses then
+        playerResponses = {}
+    end
+    
+    local playerName = GetPlayerNameWithoutRealm(sender)
+
     -- Check for "123" message which is commonly used to request a summon
     if (event == "CHAT_MSG_RAID" or event == "CHAT_MSG_RAID_LEADER" or 
         event == "CHAT_MSG_RAID_WARNING" or event == "CHAT_MSG_PARTY" or 
@@ -272,10 +277,39 @@ local function CheckForSummonRequest(_, event, msg, sender)
         (msg == "123" or string.lower(msg):match("^123") or 
          string.lower(msg):match("summon") or string.lower(msg):match("need%s+summ?on")) then
         
+        if playerResponses[playerName] then
+            return  -- Ignore if already responded
+        end
+
         -- Add the player to our responses list
-        playerResponses[sender] = true
+        playerResponses[playerName] = true
+
+        -- Play a subtle sound to notify without being annoying
+        PlaySound(SOUNDKIT.READY_CHECK, "Master")
         
-        -- Update the UI to show the checkmark
+        -- Find and flash the player row if they're in view
+        for i, buttonFrame in ipairs(raidList) do
+            if buttonFrame.nameText and buttonFrame.nameText:GetText():match("^" .. sender) then
+                -- Add a flash effect
+                local flash = buttonFrame:CreateTexture(nil, "OVERLAY")
+                flash:SetAllPoints()
+                flash:SetColorTexture(0, 1, 0, 0.3)
+                flash:SetBlendMode("ADD")
+                
+                -- Create a fading animation
+                local ag = flash:CreateAnimationGroup()
+                local anim = ag:CreateAnimation("Alpha")
+                anim:SetFromAlpha(0.3)
+                anim:SetToAlpha(0)
+                anim:SetDuration(1.5)
+                ag:SetScript("OnFinished", function() flash:Hide() end)
+                ag:Play()
+                
+                break
+            end
+        end
+        
+        -- Update the UI to show the checkmark and request text
         UpdateRaidList()
     end
 end
@@ -294,7 +328,12 @@ frame:SetScript("OnEvent", function(self, event, ...)
 end)
 
 local function ResetResponses()
-    wipe(playerResponses)
+    if playerResponses then
+        wipe(playerResponses)
+    else
+        playerResponses = {}
+    end
+    
     UpdateRaidList()
 end
 
