@@ -1,3 +1,4 @@
+
 local frame = CreateFrame("Frame", "SummonHelperFrame", UIParent, "BackdropTemplate")
 frame:SetSize(400, 500)
 frame:SetPoint("CENTER")
@@ -138,7 +139,7 @@ local function DoSummon(name)
     end)
     
     -- Announce the summon when clicked
-    SendChatMessage("Summoning " .. name .. ", please click!", channel)
+    SendChatMessage("SummonHelper: Summoning " .. name .. ", please click!", channel)
     
     -- Auto-hide after 20 seconds
     C_Timer.After(20, function() 
@@ -210,10 +211,8 @@ local function UpdateRaidList()
                 buttonFrame.separator = separator
             end
 
-            -- Position the button based on its visible index
             buttonFrame:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, -((visibleIndex-1) * itemHeight))
             
-            -- Set Name and Location
             local classColor = RAID_CLASS_COLORS[class] or {r=1, g=1, b=1}
             local displayText = name
             if isInInstance then
@@ -221,18 +220,14 @@ local function UpdateRaidList()
             end
             buttonFrame.nameText:SetText(displayText)
             
-            -- Apply appropriate styling based on player status
             if isInInstance or inRange then
-                -- Player is in range or in instance - 0.5 opacity, no summon button
                 buttonFrame.nameText:SetTextColor(classColor.r, classColor.g, classColor.b, 0.5)
                 buttonFrame.summonButton:Hide()
             else
-                -- Player is out of range - full opacity with summon button
                 buttonFrame.nameText:SetTextColor(classColor.r, classColor.g, classColor.b, 1.0)
                 buttonFrame.summonButton:Show()
             end
 
-            -- If the player(me) is in the same instance, and the raid member too but not in range, show summon button
             if meIsInInstance and isInInstance and not inRange then
                 buttonFrame.nameText:SetTextColor(classColor.r, classColor.g, classColor.b, 1.0)
                 buttonFrame.summonButton:Show()
@@ -241,12 +236,11 @@ local function UpdateRaidList()
             -- Handle checkmark and request text visibility (123 responders)
             if hasAnswered then
                 -- log the response for debugging
-                buttonFrame.nameText:SetText(displayText .. " - [Summon]")
+                buttonFrame.nameText:SetText(displayText .. " - [Summon Requested]")
             else
                 buttonFrame.nameText:SetText(displayText)
             end
 
-            -- Hide separator on the last item
             if visibleIndex == numVisibleMembers then
                 buttonFrame.separator:Hide()
             else
@@ -263,53 +257,54 @@ local function GetPlayerNameWithoutRealm(fullName)
 end
 
 local function CheckForSummonRequest(_, event, msg, sender)
-    -- Initialize playerResponses if it's nil
     if not playerResponses then
         playerResponses = {}
     end
     
     local playerName = GetPlayerNameWithoutRealm(sender)
-
-    -- Check for "123" message which is commonly used to request a summon
+    local summonPhrases = {
+        "123",
+        "summ",
+        "summ pls",
+        "summon please",
+        "summon pls"
+    }
+    local isRequest = false
+    local lowerMsg = string.lower(msg)
+    
+    if lowerMsg:match("SummonHelper: Summoning") then
+        return
+    end
+    
+    for _, phrase in ipairs(summonPhrases) do
+        if lowerMsg == phrase then
+            isRequest = true
+            break
+        end
+    end
+    
+    if not isRequest then
+        if lowerMsg:match("^123") or 
+           lowerMsg:match("summ[o]?[n]?") or 
+           lowerMsg:match("need%s+summ[o]?[n]?") or
+           lowerMsg:match("summoning me") then
+            isRequest = true
+        end
+    end
+    
     if (event == "CHAT_MSG_RAID" or event == "CHAT_MSG_RAID_LEADER" or 
         event == "CHAT_MSG_RAID_WARNING" or event == "CHAT_MSG_PARTY" or 
-        event == "CHAT_MSG_PARTY_LEADER") and 
-        (msg == "123" or string.lower(msg):match("^123") or 
-         string.lower(msg):match("summon") or string.lower(msg):match("need%s+summ?on")) then
+        event == "CHAT_MSG_PARTY_LEADER") and isRequest then
         
         if playerResponses[playerName] then
             return  -- Ignore if already responded
         end
 
-        -- Add the player to our responses list
+        print("|cFF33FF33SummonHelper:|r " .. playerName .. " requested a summon: \"" .. msg .. "\"")
+
         playerResponses[playerName] = true
 
-        -- Play a subtle sound to notify without being annoying
         PlaySound(SOUNDKIT.READY_CHECK, "Master")
-        
-        -- Find and flash the player row if they're in view
-        for i, buttonFrame in ipairs(raidList) do
-            if buttonFrame.nameText and buttonFrame.nameText:GetText():match("^" .. sender) then
-                -- Add a flash effect
-                local flash = buttonFrame:CreateTexture(nil, "OVERLAY")
-                flash:SetAllPoints()
-                flash:SetColorTexture(0, 1, 0, 0.3)
-                flash:SetBlendMode("ADD")
-                
-                -- Create a fading animation
-                local ag = flash:CreateAnimationGroup()
-                local anim = ag:CreateAnimation("Alpha")
-                anim:SetFromAlpha(0.3)
-                anim:SetToAlpha(0)
-                anim:SetDuration(1.5)
-                ag:SetScript("OnFinished", function() flash:Hide() end)
-                ag:Play()
-                
-                break
-            end
-        end
-        
-        -- Update the UI to show the checkmark and request text
         UpdateRaidList()
     end
 end
