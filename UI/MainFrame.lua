@@ -52,7 +52,16 @@ function SummonHelperUI:CreateMainFrame()
     
     -- Add OnShow handling
     frame:SetScript("OnShow", function()
-        _G.SummonHelperCore:UpdateRaidList()
+        if _G.SummonHelperCore then
+            _G.SummonHelperCore:SetActive(true)
+            _G.SummonHelperCore:UpdateRaidList()
+        end
+    end)
+
+    frame:SetScript("OnHide", function()
+        if _G.SummonHelperCore then
+            _G.SummonHelperCore:SetActive(false)
+        end
     end)
     
     self.frame = frame
@@ -82,11 +91,10 @@ end
 function SummonHelperUI:ToggleMainFrame()
     if self.frame:IsShown() then
         self.frame:Hide()
-        if SummonHelperSummonButton.button then
+        if SummonHelperSummonButton and SummonHelperSummonButton.button then
             SummonHelperSummonButton.button:Hide()
         end
     else
         self.frame:Show()
-        _G.SummonHelperCore:UpdateRaidList()
     end
 end

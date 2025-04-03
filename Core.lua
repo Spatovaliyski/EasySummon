@@ -20,6 +20,10 @@ function SummonHelper:InitializeEvents()
     self.frame:RegisterEvent("CHAT_MSG_RAID_WARNING")
     
     self.frame:SetScript("OnEvent", function(_, event, ...)
+        if not self.isActive and event ~= "GROUP_ROSTER_UPDATE" then
+            return
+        end
+
         if event == "GROUP_ROSTER_UPDATE" then
             self:UpdateRaidList()
         elseif event:match("CHAT_MSG_") then
@@ -28,6 +32,10 @@ function SummonHelper:InitializeEvents()
     end)
 
     self.frame:SetScript("OnUpdate", function(_, elapsed)
+        if not self.isActive then
+            return
+        end
+
         self.lastUpdate = self.lastUpdate + elapsed
         if self.lastUpdate >= self.updateInterval then
             self.lastUpdate = 0
@@ -44,6 +52,15 @@ function SummonHelper:InitializeEvents()
             end
         end
     end)
+end
+
+function SummonHelper:SetActive(isActive)
+    self.isActive = isActive
+    
+    -- If we're activating, do an immediate update
+    if isActive then
+        self:UpdateRaidList()
+    end
 end
 
 function SummonHelper:ResetResponses()
@@ -67,7 +84,10 @@ function SummonHelper:UpdateRaidList()
 end
 
 function SummonHelper:CheckForSummonRequest(event, msg, sender)
-    -- Move existing code here, adjusted for class structure
+    if not self.isActive then
+        return
+    end
+    
     local playerName = SummonHelperTextUtils:GetPlayerNameWithoutRealm(sender)
     if self:IsSummonRequest(msg, event) then
         if self.playerResponses[playerName] then

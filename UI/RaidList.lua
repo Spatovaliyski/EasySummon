@@ -167,7 +167,7 @@ function SummonHelperRaidList:CreateMemberButton(parent, index)
     
     -- Create request indicator
     local requestText = buttonFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    requestText:SetPoint("LEFT", nameText, "RIGHT", 5, 0)
+    requestText:SetPoint("LEFT", nameText, "RIGHT", -15, 0)
     requestText:SetText("[Summon me]")
     requestText:SetTextColor(0, 1, 0) -- Green color
     requestText:Hide()
