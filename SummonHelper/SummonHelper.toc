@@ -2,7 +2,7 @@
 ## Title: Summon Helper
 ## Notes: Helps Warlocks manage summons
 ## Author: Limitedby
-## Version: 1.0
+## Version: 0.1.0
 ## SavedVariables: SummonHelperDB
 
 Config.lua
