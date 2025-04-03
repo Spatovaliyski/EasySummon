@@ -1,128 +1,209 @@
 -- UI/RaidList.lua
 SummonHelperRaidList = {
-  buttons = {}
+    buttons = {}
 }
 
 function SummonHelperCore:UpdateRaidList()
-  SummonHelperRaidList:UpdateList(self.playerResponses)
+    SummonHelperRaidList:UpdateList(self.playerResponses)
 end
 
 function SummonHelperRaidList:UpdateList(playerResponses)
-  -- Hide all existing buttons
-  for i, button in ipairs(self.buttons) do
-      button:Hide()
-  end
-  
-  local itemHeight = 30
-  local members = SummonHelperGroupUtils:GetGroupMembers()
-  local scrollChild = SummonHelperUI.scrollChild
-  
-  scrollChild:SetHeight(math.max(#members * itemHeight, SummonHelperUI.scrollFrame:GetHeight()))
-
-  for i, member in ipairs(members) do
-    local hasAnswered = playerResponses[member.name] or false
-    
-    local buttonFrame = self.buttons[i]
-    if not buttonFrame then
-        buttonFrame = self:CreateMemberButton(scrollChild, i)
-        self.buttons[i] = buttonFrame
+    -- Hide all existing buttons
+    for i, button in ipairs(self.buttons) do
+        button:Hide()
     end
     
-    -- Position the button
-    buttonFrame:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, -((i-1) * itemHeight))
+    local itemHeight = 30
+    local members = SummonHelperGroupUtils:GetGroupMembers()
+    local scrollChild = SummonHelperUI.scrollChild
     
-    -- Set appearance
-    local classColor = RAID_CLASS_COLORS[member.class] or {r=1, g=1, b=1}
-    local displayText = member.name
-    if member.isPlayer then
-        displayText = displayText .. " (You)"
-    end
-    if member.isInInstance then
-        displayText = displayText .. " - Inside"
-    end
-
-    buttonFrame.nameText:SetText(displayText)
-
-    local canBeSummoned = not member.isInInstance and not member.inRange and not member.isPlayer
-    local showSummonButton = canBeSummoned or hasAnswered
-
-    if showSummonButton then
-    -- Can be summoned - full opacity with summon button
-    buttonFrame.nameText:SetTextColor(classColor.r, classColor.g, classColor.b, 1.0)
-    buttonFrame.summonButton:Show()
-
-    else
-        -- Can't be summoned - 0.5 opacity, no summon button
-        buttonFrame.nameText:SetTextColor(classColor.r, classColor.g, classColor.b, 0.5)
-        buttonFrame.summonButton:Hide()
-    end
+    -- Check if player is in an instance
+    local playerInInstance = IsInInstance()
     
-    -- Special case: If player is in instance and member is in the same instance but not in range
-    if member.isInInstance and not member.inRange and not member.isPlayer then
-        buttonFrame.nameText:SetTextColor(classColor.r, classColor.g, classColor.b, 1.0)
-        buttonFrame.summonButton:Show()
-    end
+    scrollChild:SetHeight(math.max(#members * itemHeight, SummonHelperUI.scrollFrame:GetHeight()))
+
+    for i, member in ipairs(members) do
+        local hasAnswered = playerResponses[member.name] or false
+        
+        local buttonFrame = self.buttons[i]
+        if not buttonFrame then
+            buttonFrame = self:CreateMemberButton(scrollChild, i)
+            self.buttons[i] = buttonFrame
+        end
+        
+        -- Position the button
+        buttonFrame:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, -((i-1) * itemHeight))
+        
+        -- Set appearance
+        local classColor = RAID_CLASS_COLORS[member.class] or {r=1, g=1, b=1}
+        local displayText = member.name
+        
+        -- Add player identifier
+        if member.isPlayer then
+            displayText = displayText .. " (You)"
+        end
+        
+        -- Initialize display flags
+        local showSummonButton = false
+        local textOpacity = 0.5  -- Default to grayed out
+        local instanceText = ""
+        local isSummoned = false  -- New flag to track if a player has been summoned
+        
+        -- Logic implementation according to requirements
+        if not playerInInstance then  -- Player NOT in instance
+            if member.isInInstance then
+                instanceText = " - Instanced"
+                showSummonButton = false
+            elseif member.inRange then
+                -- If Player is not in instance and Member is not in instance but in range
+                showSummonButton = false
+                if hasAnswered then
+                    isSummoned = true  -- They requested summon but are now in range
+                end
+            else
+                -- If Player is not in instance and Member is not in instance but not in range
+                showSummonButton = true
+                textOpacity = 1.0
+            end
+        else  -- Player IS in instance
+            if not member.isInInstance then
+                -- If Player in instance but Member is not in instance
+                instanceText = " - Not instanced"
+                showSummonButton = false
+            elseif not member.inRange then
+                -- If Player is in instance and Member is in instance but not in range
+                showSummonButton = true
+                textOpacity = 1.0
+                -- Don't add "Instanced" text in this case
+            else
+                -- If Player is in instance and Member is in instance but in range
+                showSummonButton = false
+                if hasAnswered then
+                    isSummoned = true  -- They requested summon but are now in range
+                end
+                -- Don't add "Instanced" text in this case
+            end
+        end
+        
+        -- never show summon button for self
+        if member.isPlayer then
+            showSummonButton = false
+        end
+        
+        -- Add instance text to display
+        displayText = displayText .. instanceText
+        
+        -- Handle summon request logic
+        local eligibleForSummonRequest = false
+        
+        -- Check if eligible for summon request (according to additional cases)
+        if (not playerInInstance and not member.isInInstance and not member.inRange) or
+           (playerInInstance and member.isInInstance and not member.inRange) then
+            eligibleForSummonRequest = true
+        end
+        
+        -- Apply summon request status
+        if hasAnswered then
+            if isSummoned then
+                -- Player has been summoned (they requested and are now in range)
+                buttonFrame.requestText:SetText("[Summoned]")
+                buttonFrame.requestText:SetTextColor(1, 1, 1) -- White color for summoned
+                buttonFrame.requestText:Show()
+                textOpacity = 0.5  -- Reduce opacity for summoned players
+                showSummonButton = false
+            elseif eligibleForSummonRequest then
+                -- Player still needs to be summoned
+                buttonFrame.requestText:SetText("[Summon me]")
+                buttonFrame.requestText:SetTextColor(0, 1, 0) -- Green color for pending summons
+                buttonFrame.requestText:Show()
+                textOpacity = 1.0  -- Full opacity for players who requested summon
+                showSummonButton = true
+            else
+                -- Player requested but is now in a state where they can't be summoned
+                buttonFrame.requestText:Hide()
+            end
+        else
+            buttonFrame.requestText:Hide()
+        end
     
-    -- Handle summon request indicator
-    if hasAnswered then
-        buttonFrame.requestText:Show()
-        buttonFrame.nameText:SetTextColor(classColor.r, classColor.g, classColor.b, 1.0)
-        buttonFrame.summonButton:Show()
-    else
-        buttonFrame.requestText:Hide()
+        -- Apply the calculated settings
+        buttonFrame.nameText:SetText(displayText)
+        buttonFrame.nameText:SetTextColor(classColor.r, classColor.g, classColor.b, textOpacity)
+        
+        if showSummonButton then
+            buttonFrame.summonButton:Show()
+        else
+            buttonFrame.summonButton:Hide()
+        end
+        
+        -- Hide separator on the last item
+        if i == #members then
+            buttonFrame.separator:Hide()
+        else
+            buttonFrame.separator:Show()
+        end
+        
+        -- Set button callback with the correct member.name
+        buttonFrame.summonButton:SetScript("OnClick", function()
+            SummonHelperSummonButton:DoSummon(member.name)
+        end)
+        
+        buttonFrame:Show()
     end
-      
-      -- Hide separator on the last item
-      if i == #members then
-          buttonFrame.separator:Hide()
-      else
-          buttonFrame.separator:Show()
-      end
-      
-      -- Set button callback with the correct member.name
-      buttonFrame.summonButton:SetScript("OnClick", function()
-          SummonHelperSummonButton:DoSummon(member.name)
-      end)
-      
-      buttonFrame:Show()
-  end
 end
-
+  
+-- Add the CreateMemberButton method that was missing
 function SummonHelperRaidList:CreateMemberButton(parent, index)
-  local buttonFrame = CreateFrame("Frame", "SummonHelperListButton"..index, parent)
-  buttonFrame:SetSize(340, 30)
-  buttonFrame:SetFrameLevel(parent:GetFrameLevel() + 1)
-  
-  -- Create name text
-  local nameText = buttonFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  nameText:SetPoint("LEFT", 10, 0)
-  nameText:SetWidth(180)
-  nameText:SetJustifyH("LEFT")
-  buttonFrame.nameText = nameText
-  
-  -- Create request indicator
-  local requestText = buttonFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  requestText:SetPoint("LEFT", nameText, "RIGHT", -15, 0)
-  requestText:SetText("[Summon me]")
-  requestText:SetTextColor(unpack(SummonHelperConfig.Colors.Requested))
-  requestText:Hide()
-  buttonFrame.requestText = requestText
-  
-  -- Create summon button
-  local summonButton = CreateFrame("Button", nil, buttonFrame, "UIPanelButtonTemplate")
-  summonButton:SetSize(80, 20)
-  summonButton:SetPoint("RIGHT", -10, 0)
-  summonButton:SetText("Target")
-  summonButton:SetFrameLevel(buttonFrame:GetFrameLevel() + 1)
-  buttonFrame.summonButton = summonButton
-  
-  -- Add separator
-  local separator = buttonFrame:CreateTexture(nil, "BACKGROUND")
-  separator:SetHeight(1)
-  separator:SetColorTexture(0.5, 0.5, 0.5, 0.5)
-  separator:SetPoint("BOTTOMLEFT", buttonFrame, "BOTTOMLEFT", 10, 0)
-  separator:SetPoint("BOTTOMRIGHT", buttonFrame, "BOTTOMRIGHT", -10, 0)
-  buttonFrame.separator = separator
-  
-  return buttonFrame
+    local buttonFrame = CreateFrame("Frame", "SummonHelperListButton"..index, parent)
+    buttonFrame:SetSize(340, 30)
+    buttonFrame:SetFrameLevel(parent:GetFrameLevel() + 1)
+    
+    -- Create name text
+    local nameText = buttonFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    nameText:SetPoint("LEFT", 10, 0)
+    nameText:SetWidth(180)
+    nameText:SetJustifyH("LEFT")
+    buttonFrame.nameText = nameText
+    
+    -- Create request indicator
+    local requestText = buttonFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    requestText:SetPoint("LEFT", nameText, "RIGHT", 5, 0)
+    requestText:SetText("[Summon me]")
+    requestText:SetTextColor(0, 1, 0) -- Green color
+    requestText:Hide()
+    buttonFrame.requestText = requestText
+    
+    -- Create summon button
+    local summonButton = CreateFrame("Button", nil, buttonFrame, "UIPanelButtonTemplate")
+    summonButton:SetSize(80, 20)
+    summonButton:SetPoint("RIGHT", -10, 0)
+    summonButton:SetText("Target")
+    summonButton:SetFrameLevel(buttonFrame:GetFrameLevel() + 1)
+    buttonFrame.summonButton = summonButton
+    
+    -- Add separator
+    local separator = buttonFrame:CreateTexture(nil, "BACKGROUND")
+    separator:SetHeight(1)
+    separator:SetColorTexture(0.5, 0.5, 0.5, 0.5)
+    separator:SetPoint("BOTTOMLEFT", buttonFrame, "BOTTOMLEFT", 10, 0)
+    separator:SetPoint("BOTTOMRIGHT", buttonFrame, "BOTTOMRIGHT", -10, 0)
+    buttonFrame.separator = separator
+    
+    -- Create context menu
+    buttonFrame:SetScript("OnMouseUp", function(self, button)
+        if button == "RightButton" and playerResponses[member.name] then
+            -- Create and show the context menu
+            local menu = {
+                { text = member.name, isTitle = true },
+                { text = "Clear summon status", 
+                  func = function() 
+                      _G.SummonHelperCore:ResetResponse(member.name) 
+                  end 
+                },
+            }
+            EasyMenu(menu, CreateFrame("Frame", "SummonHelperContextMenu", UIParent, "UIDropDownMenuTemplate"), "cursor", 0, 0, "MENU")
+        end
+    end)
+
+    return buttonFrame
 end

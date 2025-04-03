@@ -5,6 +5,8 @@ SummonHelper.__index = SummonHelper
 function SummonHelper:New()
     local self = setmetatable({}, SummonHelper)
     self.playerResponses = {}
+    self.updateInterval = 2
+    self.lastUpdate = 0
     self:InitializeEvents()
     return self
 end
@@ -24,11 +26,36 @@ function SummonHelper:InitializeEvents()
             self:CheckForSummonRequest(event, ...)
         end
     end)
+
+    self.frame:SetScript("OnUpdate", function(_, elapsed)
+        self.lastUpdate = self.lastUpdate + elapsed
+        if self.lastUpdate >= self.updateInterval then
+            self.lastUpdate = 0
+  
+            -- Only update the list if UI is visible
+            if SummonHelperUI and SummonHelperUI.frame and SummonHelperUI.frame:IsShown() then
+                self:UpdateRaidList()
+            end
+            
+            -- Also update when summon button is visible
+            if SummonHelperSummonButton and SummonHelperSummonButton.button and 
+               SummonHelperSummonButton.button:IsShown() then
+                self:UpdateRaidList()
+            end
+        end
+    end)
 end
 
 function SummonHelper:ResetResponses()
     wipe(self.playerResponses)
     self:UpdateRaidList()
+end
+
+function SummonHelper:ResetResponse(playerName)
+    if self.playerResponses[playerName] then
+        self.playerResponses[playerName] = nil
+        self:UpdateRaidList()
+    end
 end
 
 -- Define a placeholder UpdateRaidList method
@@ -47,7 +74,6 @@ function SummonHelper:CheckForSummonRequest(event, msg, sender)
             return  -- Ignore if already responded
         end
         
-        print("|cFF33FF33SummonHelper:|r " .. playerName .. " requested a summon: \"" .. msg .. "\"")
         self.playerResponses[playerName] = true
         PlaySound(SOUNDKIT.READY_CHECK, "Master")
         self:UpdateRaidList()
@@ -90,7 +116,6 @@ local function InitializeAddon()
           
           if _G.SummonHelperCore and _G.SummonHelperCore.UpdateRaidList then
             _G.SummonHelperCore:UpdateRaidList()
-            print("|cFF33FF33SummonHelper:|r Initial raid list updated")
           end
       else
           print("|cFFFF3333SummonHelper:|r Error: UI module not found")
