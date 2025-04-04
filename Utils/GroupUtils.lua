@@ -117,3 +117,10 @@ function SummonHelperGroupUtils:GetGroupMembers()
                     unit = unit,
                     inRange = UnitInRange(unit),
                     isInInstance = memberIsInInstance
+                })
+            end
+        end
+    end
+    
+    return members
+end
