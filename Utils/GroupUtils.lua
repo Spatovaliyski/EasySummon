@@ -7,7 +7,8 @@ end
 
 function SummonHelperGroupUtils:GetGroupMembers()
     local members = {}
-    local playerInInstance = IsInInstance()
+    local playerInInstance, playerInstanceType = IsInInstance()
+    playerInInstance = playerInInstance and playerInstanceType ~= "none"
     
     if self:IsInRaid() then
         for i = 1, 40 do
@@ -116,10 +117,3 @@ function SummonHelperGroupUtils:GetGroupMembers()
                     unit = unit,
                     inRange = UnitInRange(unit),
                     isInInstance = memberIsInInstance
-                })
-            end
-        end
-    end
-    
-    return members
-end

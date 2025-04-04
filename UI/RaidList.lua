@@ -18,7 +18,8 @@ function SummonHelperRaidList:UpdateList(playerResponses)
     local scrollChild = SummonHelperUI.scrollChild
     
     -- Check if player is in an instance
-    local playerInInstance = IsInInstance()
+    local playerInInstance, playerInstanceType = IsInInstance()
+    playerInInstance = playerInInstance and playerInstanceType ~= "none"
     
     scrollChild:SetHeight(math.max(#members * itemHeight, SummonHelperUI.scrollFrame:GetHeight()))
 
@@ -74,14 +75,12 @@ function SummonHelperRaidList:UpdateList(playerResponses)
                 -- If Player is in instance and Member is in instance but not in range
                 showSummonButton = true
                 textOpacity = 1.0
-                -- Don't add "Instanced" text in this case
             else
                 -- If Player is in instance and Member is in instance but in range
                 showSummonButton = false
                 if hasAnswered then
                     isSummoned = true  -- They requested summon but are now in range
                 end
-                -- Don't add "Instanced" text in this case
             end
         end
         
