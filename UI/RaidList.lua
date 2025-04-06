@@ -208,7 +208,6 @@ function SummonHelperRaidList:UpdateList(playerResponses)
 end
   
 function SummonHelperRaidList:CreateMemberButton(parent, index)
-    -- Create a button similar to FriendsFrameFriendButton
     local buttonFrame = CreateFrame("Button", "SummonHelperListButton"..index, parent)
     buttonFrame:SetSize(340, 40)
     buttonFrame:SetFrameLevel(parent:GetFrameLevel() + 1)
@@ -217,19 +216,21 @@ function SummonHelperRaidList:CreateMemberButton(parent, index)
     -- Set up click handler
     buttonFrame:SetScript("OnClick", function(self, button)
         if button == "LeftButton" and self.clickable then
-            -- Target the player when left-clicking their name
-            SummonHelperSummonButton:DoSummon(self.memberName)
-        elseif button == "RightButton" and playerResponses and playerResponses[self.memberName] then
-            -- Show context menu on right-click
-            local menu = {
-                { text = self.memberName, isTitle = true },
-                { text = "Clear summon status", 
-                  func = function() 
-                      _G.SummonHelperCore:ResetResponse(self.memberName) 
-                  end 
-                },
-            }
-            EasyMenu(menu, CreateFrame("Frame", "SummonHelperContextMenu", UIParent, "UIDropDownMenuTemplate"), "cursor", 0, 0, "MENU")
+            SummonHelperSummonButton:DoSummon(self.memberName, self)
+        elseif button == "RightButton" then
+            local responses = _G.SummonHelperCore.playerResponses
+            if responses and responses[self.memberName] then
+                -- Show context menu on right-click
+                local menu = {
+                    { text = self.memberName, isTitle = true },
+                    { text = "Clear summon status", 
+                      func = function() 
+                          _G.SummonHelperCore:ResetResponse(self.memberName) 
+                      end 
+                    },
+                }
+                EasyMenu(menu, CreateFrame("Frame", "SummonHelperContextMenu", UIParent, "UIDropDownMenuTemplate"), "cursor", 0, 0, "MENU")
+            end
         end
     end)
     

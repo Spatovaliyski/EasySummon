@@ -17,7 +17,7 @@ function SummonHelperUI:CreateMainFrame()
     frame:SetScript("OnDragStart", frame.StartMoving)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     frame:SetFrameStrata("HIGH")
-    frame:SetFrameLevel(100)
+    frame:SetFrameLevel(50)
 
     tinsert(UISpecialFrames, "SummonHelperFrame")
     
@@ -46,6 +46,12 @@ function SummonHelperUI:CreateMainFrame()
     end)
 
     frame:SetScript("OnHide", function()
+        if SummonHelperSummonButton and SummonHelperSummonButton.button then
+            SummonHelperSummonButton.button:Hide()
+            SummonHelperSummonButton.button = nil
+        end
+        
+        -- Telling the core its not active anymore
         if _G.SummonHelperCore then
             _G.SummonHelperCore:SetActive(false)
         end
