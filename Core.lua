@@ -104,13 +104,18 @@ function SummonHelper:IsSummonRequest(msg, event)
     -- Logic to determine if a message is a summon request
     local lowerMsg = string.lower(msg)
     
-    if lowerMsg:match("^summonhelper: summoning") then
-        return false
-    end
+    local ignorePhrases = {
+        "^summonhelper: ",
+        "^attempting to summon",
+        "^summoning ",
+        "^need a summon?"
+        "^123 for summons"
+    }
     
-    -- Also ignore other patterns that might indicate a summon is already happening
-    if lowerMsg:match("^attempting to summon") or lowerMsg:match("^summoning ") then
-        return false
+    for _, pattern in ipairs(ignorePhrases) do
+        if lowerMsg:match(pattern) then
+            return false
+        end
     end
     
     for _, phrase in ipairs(SummonHelperConfig.SummonPhrases) do

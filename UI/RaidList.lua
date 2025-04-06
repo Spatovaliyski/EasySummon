@@ -46,12 +46,11 @@ function SummonHelperRaidList:UpdateList(playerResponses)
         
         -- Initialize display flags
         local showSummonButton = false
-        local textOpacity = 0.5  -- Default to grayed out
+        local textOpacity = 0.5
         local instanceText = ""
-        local isSummoned = false  -- New flag to track if a player has been summoned
-        
-        -- Logic implementation according to requirements
-        if not playerInInstance then  -- Player NOT in instance
+        local isSummoned = false
+                
+        if not playerInInstance then
             if member.isInInstance then
                 instanceText = " - Instanced"
                 showSummonButton = false
@@ -59,7 +58,7 @@ function SummonHelperRaidList:UpdateList(playerResponses)
                 -- If Player is not in instance and Member is not in instance but in range
                 showSummonButton = false
                 if hasAnswered then
-                    isSummoned = true  -- They requested summon but are now in range
+                    isSummoned = true -- They requested summon but are now in range
                 end
             else
                 -- If Player is not in instance and Member is not in instance but not in range
@@ -106,16 +105,16 @@ function SummonHelperRaidList:UpdateList(playerResponses)
             if isSummoned then
                 -- Player has been summoned (they requested and are now in range)
                 buttonFrame.requestText:SetText("[Summoned]")
-                buttonFrame.requestText:SetTextColor(1, 1, 1) -- White color for summoned
+                buttonFrame.requestText:SetTextColor(1, 1, 1)
                 buttonFrame.requestText:Show()
-                textOpacity = 0.5  -- Reduce opacity for summoned players
+                textOpacity = 0.5
                 showSummonButton = false
             elseif eligibleForSummonRequest then
                 -- Player still needs to be summoned
                 buttonFrame.requestText:SetText("[Summon me]")
-                buttonFrame.requestText:SetTextColor(0, 1, 0) -- Green color for pending summons
+                buttonFrame.requestText:SetTextColor(0, 1, 0)
                 buttonFrame.requestText:Show()
-                textOpacity = 1.0  -- Full opacity for players who requested summon
+                textOpacity = 1.0
                 showSummonButton = true
             else
                 -- Player requested but is now in a state where they can't be summoned
@@ -151,7 +150,7 @@ function SummonHelperRaidList:UpdateList(playerResponses)
     end
 end
   
--- Add the CreateMemberButton method that was missing
+-- Add the CreateMemberButton
 function SummonHelperRaidList:CreateMemberButton(parent, index)
     local buttonFrame = CreateFrame("Frame", "SummonHelperListButton"..index, parent)
     buttonFrame:SetSize(340, 30)
@@ -168,7 +167,7 @@ function SummonHelperRaidList:CreateMemberButton(parent, index)
     local requestText = buttonFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     requestText:SetPoint("LEFT", nameText, "RIGHT", -15, 0)
     requestText:SetText("[Summon me]")
-    requestText:SetTextColor(0, 1, 0) -- Green
+    requestText:SetTextColor(0, 1, 0)
     requestText:Hide()
     buttonFrame.requestText = requestText
     

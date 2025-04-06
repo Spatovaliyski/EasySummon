@@ -32,7 +32,6 @@ function SummonHelperSummonButton:DoSummon(name)
 end
 
 function SummonHelperSummonButton:CreateSummonButton(name, macroText)
-  -- Create a new secure button
   local button = CreateFrame("Button", "SummonHelperQuickButton", UIParent, "SecureActionButtonTemplate,UIPanelButtonTemplate")
   button:SetSize(200, 40)
   button:SetPoint("BOTTOM", SummonHelperUI.frame, "TOPRIGHT", -100, 10)
