@@ -129,29 +129,49 @@ end
 
 -- Global initialization
 local function InitializeAddon()
-  _G.SummonHelperCore = SummonHelper:New()
-  print("|cFF33FF33SummonHelper:|r Core initialized")
-  
-  -- Delay UI init
-  C_Timer.After(0.5, function()
-      if SummonHelperUI and SummonHelperUI.Initialize then
-          SummonHelperUI:Initialize()
-          print("|cFF33FF33SummonHelper:|r UI initialized")
-          
-          if _G.SummonHelperCore and _G.SummonHelperCore.UpdateRaidList then
-            _G.SummonHelperCore:UpdateRaidList()
-          end
-      else
-          print("|cFFFF3333SummonHelper:|r Error: UI module not found")
-      end
-  end)
+    _G.SummonHelperCore = SummonHelper:New()
+    print("|cFF33FF33SummonHelper:|r Core initialized")
+
+    -- Delay UI init
+    C_Timer.After(0.5, function()
+        if SummonHelperUI and SummonHelperUI.Initialize then
+            SummonHelperUI:Initialize()
+            print("|cFF33FF33SummonHelper:|r UI initialized")
+            
+            if _G.SummonHelperCore and _G.SummonHelperCore.UpdateRaidList then
+                _G.SummonHelperCore:UpdateRaidList()
+            end
+        else
+            print("|cFFFF3333SummonHelper:|r Error: UI module not found")
+        end
+    end)
 end
 
 -- Register slash commands
 SLASH_SUMMONHELPER1 = "/sh"
 SLASH_SUMMONHELPER2 = "/summonhelper"
 SlashCmdList["SUMMONHELPER"] = function()
-    SummonHelperUI:ToggleMainFrame()
+    if InCombatLockdown() then
+        print("|cFFFFCC00SummonHelper:|r Cannot open during combat. Will open when combat ends.")
+    
+        if not SummonHelper.combatMonitor then
+            SummonHelper.combatMonitor = CreateFrame("Frame")
+            SummonHelper.combatMonitor:RegisterEvent("PLAYER_REGEN_ENABLED")
+            SummonHelper.combatMonitor:SetScript("OnEvent", function(self, event)
+                if event == "PLAYER_REGEN_ENABLED" and SummonHelper.pendingOpen then
+                    SummonHelper.pendingOpen = false
+                    print("|cFF33FF33SummonHelper:|r Combat ended, opening interface.")
+                    SummonHelperUI:ToggleMainFrame()
+                end
+            end)
+        end
+        
+        -- Set flag to open when combat ends
+        SummonHelper.pendingOpen = true
+    else
+        -- Not in combat, open immediately
+        SummonHelperUI:ToggleMainFrame()
+    end
 end
 
 -- Call initialization when addon loads

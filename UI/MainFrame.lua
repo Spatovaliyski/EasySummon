@@ -18,6 +18,8 @@ function SummonHelperUI:CreateMainFrame()
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     frame:SetFrameStrata("HIGH")
     frame:SetFrameLevel(100)
+
+    tinsert(UISpecialFrames, "SummonHelperFrame")
     
     -- Set the frame title
     frame.TitleText:SetText("Summon Helper")
@@ -56,7 +58,7 @@ end
 function SummonHelperUI:CreateScrollFrame()
     -- Create scroll frame
     local scrollFrame = CreateFrame("ScrollFrame", "SummonHelperScrollFrame", self.frame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetSize(360, 300)
+    scrollFrame:SetSize(370, 300)
     scrollFrame:SetPoint("TOP", 0, -70)
     scrollFrame:SetPoint("BOTTOM", 0, 40)
     
