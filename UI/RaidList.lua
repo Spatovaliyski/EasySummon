@@ -182,7 +182,7 @@ function SummonHelperRaidList:CreateMemberButton(parent, index)
     -- Add separator
     local separator = buttonFrame:CreateTexture(nil, "BACKGROUND")
     separator:SetHeight(1)
-    separator:SetColorTexture(0.5, 0.5, 0.5, 0.5)
+    separator:SetColorTexture(0.1, 0.1, 0.1, 0.8)
     separator:SetPoint("BOTTOMLEFT", buttonFrame, "BOTTOMLEFT", 10, 0)
     separator:SetPoint("BOTTOMRIGHT", buttonFrame, "BOTTOMRIGHT", -10, 0)
     buttonFrame.separator = separator

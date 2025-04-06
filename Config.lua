@@ -1,7 +1,7 @@
 -- Config.lua
 SummonHelperConfig = {
   -- UI settings
-  FrameWidth = 400,
+  FrameWidth = 390,
   FrameHeight = 500,
   
   -- Summoning phrases to detect
