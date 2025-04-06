@@ -7,14 +7,9 @@ function SummonHelperUI:Initialize()
 end
 
 function SummonHelperUI:CreateMainFrame()
-    -- Create the main frame
-    local frame = CreateFrame("Frame", "SummonHelperFrame", UIParent, "BackdropTemplate")
+    local frame = CreateFrame("Frame", "SummonHelperFrame", UIParent, "ButtonFrameTemplate")
     frame:SetSize(SummonHelperConfig.FrameWidth, SummonHelperConfig.FrameHeight)
     frame:SetPoint("CENTER")
-    frame:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background", 
-                      edgeFile = "Interface/DialogFrame/UI-DialogBox-Border", 
-                      edgeSize = 16})
-    frame:SetBackdropColor(unpack(SummonHelperConfig.Colors.Background))
     frame:SetClampedToScreen(true)
     frame:SetMovable(true)
     frame:EnableMouse(true)
@@ -22,28 +17,20 @@ function SummonHelperUI:CreateMainFrame()
     frame:SetScript("OnDragStart", frame.StartMoving)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     frame:SetFrameStrata("HIGH")
-    frame:SetFrameLevel(100)
+    frame:SetFrameLevel(50)
+
+    tinsert(UISpecialFrames, "SummonHelperFrame")
     
-    -- Create title
-    local title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    title:SetPoint("TOP", 0, -10)
-    title:SetText("Summon Helper")
+    -- Set the frame title
+    frame.TitleText:SetText("Summon Helper")
     
-    -- Create close button
-    local closeButton = CreateFrame("Button", "SummonHelperCloseButton", frame, "UIPanelCloseButton")
-    closeButton:SetSize(32, 32)
-    closeButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -3, -3)
-    closeButton:SetScript("OnClick", function()
-        frame:Hide()
-        if SummonHelperSummonButton.button then
-            SummonHelperSummonButton.button:Hide()
-        end
-    end)
-    
+    frame.portrait:SetTexture("Interface\\AddOns\\SummonHelper\\Textures\\SHLogoTransparent")
+
+
     -- Create reset button
     local resetButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
     resetButton:SetSize(100, 22)
-    resetButton:SetPoint("BOTTOM", frame, "BOTTOM", 0, 10)
+    resetButton:SetPoint("BOTTOM", frame, "BOTTOM", 0, 4)
     resetButton:SetText("Reset")
     resetButton:SetFrameLevel(frame:GetFrameLevel() + 10)
     resetButton:SetScript("OnClick", function()
@@ -59,6 +46,12 @@ function SummonHelperUI:CreateMainFrame()
     end)
 
     frame:SetScript("OnHide", function()
+        if SummonHelperSummonButton and SummonHelperSummonButton.button then
+            SummonHelperSummonButton.button:Hide()
+            SummonHelperSummonButton.button = nil
+        end
+        
+        -- Telling the core its not active anymore
         if _G.SummonHelperCore then
             _G.SummonHelperCore:SetActive(false)
         end
@@ -71,8 +64,8 @@ end
 function SummonHelperUI:CreateScrollFrame()
     -- Create scroll frame
     local scrollFrame = CreateFrame("ScrollFrame", "SummonHelperScrollFrame", self.frame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetSize(360, 400)
-    scrollFrame:SetPoint("TOP", 0, -40)
+    scrollFrame:SetSize(370, 300)
+    scrollFrame:SetPoint("TOP", 0, -70)
     scrollFrame:SetPoint("BOTTOM", 0, 40)
     
     local scrollChild = CreateFrame("Frame", "SummonHelperScrollChild", scrollFrame)
