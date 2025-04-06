@@ -108,7 +108,7 @@ function SummonHelper:IsSummonRequest(msg, event)
         "^summonhelper: ",
         "^attempting to summon",
         "^summoning ",
-        "^need a summon?"
+        "^need a summon?",
         "^123 for summons"
     }
     
