@@ -14,10 +14,20 @@ function SummonHelperRaidList:UpdateList(playerResponses)
     
     local itemHeight = 40
     local members = SummonHelperGroupUtils:GetGroupMembers()
+
+    -- Check if the UI is available
+    if not SummonHelperUI or not SummonHelperUI.scrollChild then
+        C_Timer.After(0.5, function()
+            SummonHelperCore:UpdateRaidList()
+        end)
+        return
+    end
+
     local scrollChild = SummonHelperUI.scrollChild
 
     local playerInInstance, playerInstanceType = IsInInstance()
     playerInInstance = playerInInstance and playerInstanceType ~= "none"
+    local isBattleground = playerInstanceType == "pvp" or playerInstanceType == "arena"
     
     scrollChild:SetHeight(math.max(#members * itemHeight, SummonHelperUI.scrollFrame:GetHeight()))
 
@@ -49,15 +59,23 @@ function SummonHelperRaidList:UpdateList(playerResponses)
         -- Fixed logic for determining status
         if playerInInstance then
             -- Player IS in instance
-            if not member.isInInstance then
+            if not member.isInInstance and isBattleground then
+                -- If Player is in instance and Member is in instance and in range but in battleground
+                statusText = "In Battleground"
+                clickable = false
+                textOpacity = 0.7
+
+            elseif not member.isInInstance and not isBattleground then
                 -- If Player in instance but Member is not in instance
                 statusText = "Not Instanced"
                 clickable = false
+
             elseif not member.inRange then
                 -- If Player is in instance and Member is in instance but not in range
                 statusText = ""
                 clickable = true
                 textOpacity = 1.0
+
             else
                 -- If Player is in instance and Member is in instance and in range
                 statusText = ""
