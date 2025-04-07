@@ -9,7 +9,13 @@ function SummonHelperSummonButton:DoSummon(name, anchorFrame)
     -- Create macro for summoning
     local macroName = "SH_Summon"
     local macroIcon = "INV_MISC_QUESTIONMARK"
-    local macroText = "/targetexact " .. name .. "\n/cast Ritual of Summoning"
+    local macroText
+
+    if channel == "RAID" then
+        macroText = "/targetexact " .. name .. "\n/cast Ritual of Summoning\n/raid SummonHelper: Summoning " .. name .. ", please click!"
+    else
+        macroText = "/targetexact " .. name .. "\n/cast Ritual of Summoning\n/party SummonHelper: Summoning " .. name .. ", please click!"
+    end
 
     local macroIndex = GetMacroIndexByName(macroName)
     if macroIndex > 0 then
@@ -26,9 +32,6 @@ function SummonHelperSummonButton:DoSummon(name, anchorFrame)
 
     -- Create the summoning button, passing the anchor frame
     self:CreateSummonButton(name, macroText, anchorFrame)
-
-    -- Announce the summon
-    SendChatMessage("SummonHelper: Summoning " .. name .. ", please click!", channel)
 end
   
 function SummonHelperSummonButton:CreateSummonButton(name, macroText, anchorFrame)

@@ -27,7 +27,7 @@ function SummonHelperRaidList:UpdateList(playerResponses)
 
     local playerInInstance, playerInstanceType = IsInInstance()
     playerInInstance = playerInInstance and playerInstanceType ~= "none"
-    local isBattleground = playerInstanceType == "pvp" or playerInstanceType == "arena"
+    local inPVPInstance = playerInstanceType == "pvp" or playerInstanceType == "arena"
     
     scrollChild:SetHeight(math.max(#members * itemHeight, SummonHelperUI.scrollFrame:GetHeight()))
 
@@ -56,26 +56,23 @@ function SummonHelperRaidList:UpdateList(playerResponses)
         local statusText = ""
         local isSummoned = false
         
-        -- Fixed logic for determining status
         if playerInInstance then
             -- Player IS in instance
-            if not member.isInInstance and isBattleground then
+            if inPVPInstance then
                 -- If Player is in instance and Member is in instance and in range but in battleground
-                statusText = "In Battleground"
+                statusText = "In PVP Instance"
                 clickable = false
                 textOpacity = 0.7
-
-            elseif not member.isInInstance and not isBattleground then
+            elseif not member.isInInstance then
                 -- If Player in instance but Member is not in instance
                 statusText = "Not Instanced"
                 clickable = false
 
-            elseif not member.inRange then
+            elseif not member.inRange  then
                 -- If Player is in instance and Member is in instance but not in range
                 statusText = ""
                 clickable = true
                 textOpacity = 1.0
-
             else
                 -- If Player is in instance and Member is in instance and in range
                 statusText = ""
@@ -124,7 +121,7 @@ function SummonHelperRaidList:UpdateList(playerResponses)
             if isSummoned then
                 -- Player has been summoned (they requested and are now in range)
                 statusText = "Summoned"
-                textOpacity = 0.5
+                textOpacity = 0.7
                 clickable = false
             elseif eligibleForSummonRequest then
                 -- Player still needs to be summoned
