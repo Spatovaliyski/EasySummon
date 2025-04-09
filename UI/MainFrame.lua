@@ -62,21 +62,16 @@ function SummonHelperUI:CreateMainFrame()
 end
 
 function SummonHelperUI:CreateScrollFrame()
-    -- Create scroll frame
+    -- Main scroll frame
     local scrollFrame = CreateFrame("ScrollFrame", "SummonHelperScrollFrame", self.frame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetSize(370, 300)
-    scrollFrame:SetPoint("TOP", 0, -70)
-    scrollFrame:SetPoint("BOTTOM", 0, 40)
-    
+    scrollFrame:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 16, -70)
+    scrollFrame:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", -36, 40)
+
+    -- Scroll child
     local scrollChild = CreateFrame("Frame", "SummonHelperScrollChild", scrollFrame)
-    scrollChild:SetWidth(360)
+    scrollChild:SetSize(1, 1) -- auto
     scrollFrame:SetScrollChild(scrollChild)
-    
-    local scrollBar = _G["SummonHelperScrollFrameScrollBar"]
-    scrollBar:ClearAllPoints()
-    scrollBar:SetPoint("TOPRIGHT", scrollFrame, "TOPRIGHT", 0, -16)
-    scrollBar:SetPoint("BOTTOMRIGHT", scrollFrame, "BOTTOMRIGHT", 0, 16)
-    
+
     self.scrollFrame = scrollFrame
     self.scrollChild = scrollChild
 end
