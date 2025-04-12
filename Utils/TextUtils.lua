@@ -1,6 +1,6 @@
 -- Utils/TextUtils.lua
-SummonHelperTextUtils = {}
+EasySummonTextUtils = {}
 
-function SummonHelperTextUtils:GetPlayerNameWithoutRealm(fullName)
+function EasySummonTextUtils:GetPlayerNameWithoutRealm(fullName)
     return string.match(fullName, "([^%-]+)")  -- Extracts the player name before the dash
 end

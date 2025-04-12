@@ -1,9 +1,9 @@
 ## Interface: 11506, 11507
-## Title: Summon Helper
+## Title: Easy Summon
 ## Notes: Helps Warlocks manage summons
 ## Author: Limitedby
-## Version: 1.0.2
-## SavedVariables: SummonHelperDB
+## Version: 1.0.3
+## SavedVariables: EasySummonDB
 
 Config.lua
 Utils\TextUtils.lua

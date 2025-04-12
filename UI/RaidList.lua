@@ -1,35 +1,35 @@
 -- UI/RaidList.lua
-SummonHelperRaidList = {
+EasySummonRaidList = {
     buttons = {}
 }
 
-function SummonHelperCore:UpdateRaidList()
-    SummonHelperRaidList:UpdateList(self.playerResponses)
+function EasySummonCore:UpdateRaidList()
+    EasySummonRaidList:UpdateList(self.playerResponses)
 end
 
-function SummonHelperRaidList:UpdateList(playerResponses)
+function EasySummonRaidList:UpdateList(playerResponses)
     for i, button in ipairs(self.buttons) do
         button:Hide()
     end
     
     local itemHeight = 40
-    local members = SummonHelperGroupUtils:GetGroupMembers()
+    local members = EasySummonGroupUtils:GetGroupMembers()
 
     -- Check if the UI is available
-    if not SummonHelperUI or not SummonHelperUI.scrollChild then
+    if not EasySummonUI or not EasySummonUI.scrollChild then
         C_Timer.After(0.5, function()
-            SummonHelperCore:UpdateRaidList()
+            EasySummonCore:UpdateRaidList()
         end)
         return
     end
 
-    local scrollChild = SummonHelperUI.scrollChild
+    local scrollChild = EasySummonUI.scrollChild
 
     local playerInInstance, playerInstanceType = IsInInstance()
     playerInInstance = playerInInstance and playerInstanceType ~= "none"
     local inPVPInstance = playerInstanceType == "pvp" or playerInstanceType == "arena"
     
-    scrollChild:SetHeight(math.max(#members * itemHeight, SummonHelperUI.scrollFrame:GetHeight()))
+    scrollChild:SetHeight(math.max(#members * itemHeight, EasySummonUI.scrollFrame:GetHeight()))
 
     for i, member in ipairs(members) do
         local hasAnswered = playerResponses[member.name] or false
@@ -222,8 +222,8 @@ function SummonHelperRaidList:UpdateList(playerResponses)
     end
 end
   
-function SummonHelperRaidList:CreateMemberButton(parent, index)
-    local buttonFrame = CreateFrame("Button", "SummonHelperListButton"..index, parent)
+function EasySummonRaidList:CreateMemberButton(parent, index)
+    local buttonFrame = CreateFrame("Button", "EasySummonListButton"..index, parent)
     buttonFrame:SetSize(340, 40)
     buttonFrame:SetFrameLevel(parent:GetFrameLevel() + 1)
     buttonFrame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
@@ -231,20 +231,20 @@ function SummonHelperRaidList:CreateMemberButton(parent, index)
     -- Set up click handler
     buttonFrame:SetScript("OnClick", function(self, button)
         if button == "LeftButton" and self.clickable then
-            SummonHelperSummonButton:DoSummon(self.memberName, self)
+            EasySummonSummonButton:DoSummon(self.memberName, self)
         elseif button == "RightButton" then
-            local responses = _G.SummonHelperCore.playerResponses
+            local responses = _G.EasySummonCore.playerResponses
             if responses and responses[self.memberName] then
                 -- Show context menu on right-click
                 local menu = {
                     { text = self.memberName, isTitle = true },
                     { text = "Clear summon status", 
                       func = function() 
-                          _G.SummonHelperCore:ResetResponse(self.memberName) 
+                          _G.EasySummonCore:ResetResponse(self.memberName) 
                       end 
                     },
                 }
-                EasyMenu(menu, CreateFrame("Frame", "SummonHelperContextMenu", UIParent, "UIDropDownMenuTemplate"), "cursor", 0, 0, "MENU")
+                EasyMenu(menu, CreateFrame("Frame", "EasySummonContextMenu", UIParent, "UIDropDownMenuTemplate"), "cursor", 0, 0, "MENU")
             end
         end
     end)

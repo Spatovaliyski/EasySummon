@@ -1,5 +1,5 @@
 -- Config.lua
-SummonHelperConfig = {
+EasySummonConfig = {
   -- UI settings
   FrameWidth = 390,
   FrameHeight = 500,
@@ -13,8 +13,13 @@ SummonHelperConfig = {
       "summ",
       "summ pls",
       "summon please",
-      "summon pls"
+      "summon pls",
+      "summon plz",
+      "summon",
+      "summon me",
   },
+
+  NotifyWhenHidden = false,
   
   -- Colors
   Colors = {

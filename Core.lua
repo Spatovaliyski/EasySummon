@@ -1,9 +1,9 @@
 -- Core.lua
-SummonHelper = {}
-SummonHelper.__index = SummonHelper
+EasySummon = {}
+EasySummon.__index = EasySummon
 
-function SummonHelper:New()
-    local self = setmetatable({}, SummonHelper)
+function EasySummon:New()
+    local self = setmetatable({}, EasySummon)
     self.playerResponses = {}
     self.updateInterval = 2
     self.lastUpdate = 0
@@ -11,10 +11,11 @@ function SummonHelper:New()
     return self
 end
 
-function SummonHelper:InitializeEvents()
+function EasySummon:InitializeEvents()
     self.frame = CreateFrame("Frame")
     self.frame:RegisterEvent("GROUP_ROSTER_UPDATE")
     self.frame:RegisterEvent("CHAT_MSG_PARTY")
+    self.frame:RegisterEvent("CHAT_MSG_PARTY_LEADER")
     self.frame:RegisterEvent("CHAT_MSG_RAID")
     self.frame:RegisterEvent("CHAT_MSG_RAID_LEADER")
     self.frame:RegisterEvent("CHAT_MSG_RAID_WARNING")
@@ -41,20 +42,20 @@ function SummonHelper:InitializeEvents()
             self.lastUpdate = 0
   
             -- Only update the list if UI is visible
-            if SummonHelperUI and SummonHelperUI.frame and SummonHelperUI.frame:IsShown() then
+            if EasySummonUI and EasySummonUI.frame and EasySummonUI.frame:IsShown() then
                 self:UpdateRaidList()
             end
             
             -- Also update when summon button is visible
-            if SummonHelperSummonButton and SummonHelperSummonButton.button and 
-               SummonHelperSummonButton.button:IsShown() then
+            if EasySummonSummonButton and EasySummonSummonButton.button and 
+               EasySummonSummonButton.button:IsShown() then
                 self:UpdateRaidList()
             end
         end
     end)
 end
 
-function SummonHelper:SetActive(isActive)
+function EasySummon:SetActive(isActive)
     self.isActive = isActive
     
     -- If we're activating, do an immediate update
@@ -63,12 +64,12 @@ function SummonHelper:SetActive(isActive)
     end
 end
 
-function SummonHelper:ResetResponses()
+function EasySummon:ResetResponses()
     wipe(self.playerResponses)
     self:UpdateRaidList()
 end
 
-function SummonHelper:ResetResponse(playerName)
+function EasySummon:ResetResponse(playerName)
     if self.playerResponses[playerName] then
         self.playerResponses[playerName] = nil
         self:UpdateRaidList()
@@ -76,19 +77,19 @@ function SummonHelper:ResetResponse(playerName)
 end
 
 -- Define a placeholder UpdateRaidList method
-function SummonHelper:UpdateRaidList()
+function EasySummon:UpdateRaidList()
   -- Will be overridden by RaidList.lua
-  if SummonHelperRaidList and SummonHelperRaidList.UpdateList then
-      SummonHelperRaidList:UpdateList(self.playerResponses)
+  if EasySummonRaidList and EasySummonRaidList.UpdateList then
+      EasySummonRaidList:UpdateList(self.playerResponses)
   end
 end
 
-function SummonHelper:CheckForSummonRequest(event, msg, sender)
+function EasySummon:CheckForSummonRequest(event, msg, sender)
     if not self.isActive then
         return
     end
     
-    local playerName = SummonHelperTextUtils:GetPlayerNameWithoutRealm(sender)
+    local playerName = EasySummonTextUtils:GetPlayerNameWithoutRealm(sender)
     if self:IsSummonRequest(msg, event) then
         if self.playerResponses[playerName] then
             return  -- Ignore if already responded
@@ -100,12 +101,12 @@ function SummonHelper:CheckForSummonRequest(event, msg, sender)
     end
 end
 
-function SummonHelper:IsSummonRequest(msg, event)
+function EasySummon:IsSummonRequest(msg, event)
     -- Logic to determine if a message is a summon request
     local lowerMsg = string.lower(msg)
     
     local ignorePhrases = {
-        "^summonhelper: ",
+        "^easysummon: ",
         "^attempting to summon",
         "^summoning ",
         "^need a summon?",
@@ -118,7 +119,7 @@ function SummonHelper:IsSummonRequest(msg, event)
         end
     end
     
-    for _, phrase in ipairs(SummonHelperConfig.SummonPhrases) do
+    for _, phrase in ipairs(EasySummonConfig.SummonPhrases) do
         if lowerMsg == phrase then
             return true
         end
@@ -129,48 +130,49 @@ end
 
 -- Global initialization
 local function InitializeAddon()
-    _G.SummonHelperCore = SummonHelper:New()
-    print("|cFF33FF33SummonHelper:|r Core initialized")
+    _G.EasySummonCore = EasySummon:New()
 
     -- Delay UI init
     C_Timer.After(0.5, function()
-        if SummonHelperUI and SummonHelperUI.Initialize then
-            SummonHelperUI:Initialize()
-            print("|cFF33FF33SummonHelper:|r UI initialized")
+        if EasySummonUI and EasySummonUI.Initialize then
+            EasySummonUI:Initialize()
+            print("|cFF33FF33EasySummon:|r initialized")
             
-            if _G.SummonHelperCore and _G.SummonHelperCore.UpdateRaidList then
-                _G.SummonHelperCore:UpdateRaidList()
+            if _G.EasySummonCore and _G.EasySummonCore.UpdateRaidList then
+                _G.EasySummonCore:UpdateRaidList()
             end
         else
-            print("|cFFFF3333SummonHelper:|r Error: UI module not found")
+            print("|cFFFF3333EasySummon:|r Error: UI module not found")
         end
     end)
 end
 
 -- Register slash commands
-SLASH_SUMMONHELPER1 = "/sh"
-SLASH_SUMMONHELPER2 = "/summonhelper"
-SlashCmdList["SUMMONHELPER"] = function()
+SLASH_SCOMMAND1 = "/easysummon"
+SLASH_SCOMMAND3 = "/summon"
+SLASH_SCOMMAND2 = "/es"
+SLASH_SCOMMAND4 = "/sh" -- Legacy
+SlashCmdList["SCOMMAND"] = function()
     if InCombatLockdown() then
-        print("|cFFFFCC00SummonHelper:|r Cannot open during combat. Will open when combat ends.")
+        print("|cFFFFCC00EasySummon:|r Cannot open during combat. Will open when combat ends.")
     
-        if not SummonHelper.combatMonitor then
-            SummonHelper.combatMonitor = CreateFrame("Frame")
-            SummonHelper.combatMonitor:RegisterEvent("PLAYER_REGEN_ENABLED")
-            SummonHelper.combatMonitor:SetScript("OnEvent", function(self, event)
-                if event == "PLAYER_REGEN_ENABLED" and SummonHelper.pendingOpen then
-                    SummonHelper.pendingOpen = false
-                    print("|cFF33FF33SummonHelper:|r Combat ended, opening interface.")
-                    SummonHelperUI:ToggleMainFrame()
+        if not EasySummon.combatMonitor then
+            EasySummon.combatMonitor = CreateFrame("Frame")
+            EasySummon.combatMonitor:RegisterEvent("PLAYER_REGEN_ENABLED")
+            EasySummon.combatMonitor:SetScript("OnEvent", function(self, event)
+                if event == "PLAYER_REGEN_ENABLED" and EasySummon.pendingOpen then
+                    EasySummon.pendingOpen = false
+                    print("|cFF33FF33EasySummon:|r Combat ended, opening interface.")
+                    EasySummonUI:ToggleMainFrame()
                 end
             end)
         end
         
         -- Set flag to open when combat ends
-        SummonHelper.pendingOpen = true
+        EasySummon.pendingOpen = true
     else
         -- Not in combat, open immediately
-        SummonHelperUI:ToggleMainFrame()
+        EasySummonUI:ToggleMainFrame()
     end
 end
 

@@ -1,9 +1,9 @@
 -- UI/SummonButton.lua
-SummonHelperSummonButton = {
+EasySummonSummonButton = {
   button = nil
 }
 
-function SummonHelperSummonButton:DoSummon(name, anchorFrame)
+function EasySummonSummonButton:DoSummon(name, anchorFrame)
     local channel = IsInRaid() and "RAID" or "PARTY"
 
     -- Create macro for summoning
@@ -12,9 +12,9 @@ function SummonHelperSummonButton:DoSummon(name, anchorFrame)
     local macroText
 
     if channel == "RAID" then
-        macroText = "/targetexact " .. name .. "\n/cast Ritual of Summoning\n/raid SummonHelper: Summoning " .. name .. ", please click!"
+        macroText = "/targetexact " .. name .. "\n/cast Ritual of Summoning\n/raid EasySummon: Summoning " .. name .. ", please click!"
     else
-        macroText = "/targetexact " .. name .. "\n/cast Ritual of Summoning\n/party SummonHelper: Summoning " .. name .. ", please click!"
+        macroText = "/targetexact " .. name .. "\n/cast Ritual of Summoning\n/party EasySummon: Summoning " .. name .. ", please click!"
     end
 
     local macroIndex = GetMacroIndexByName(macroName)
@@ -34,8 +34,8 @@ function SummonHelperSummonButton:DoSummon(name, anchorFrame)
     self:CreateSummonButton(name, macroText, anchorFrame)
 end
   
-function SummonHelperSummonButton:CreateSummonButton(name, macroText, anchorFrame)
-    local button = CreateFrame("Button", "SummonHelperQuickButton", UIParent, "SecureActionButtonTemplate")
+function EasySummonSummonButton:CreateSummonButton(name, macroText, anchorFrame)
+    local button = CreateFrame("Button", "EasySummonQuickButton", UIParent, "SecureActionButtonTemplate")
 
     button:SetFrameStrata("HIGH")
     button:SetFrameLevel(101)
@@ -94,7 +94,7 @@ function SummonHelperSummonButton:CreateSummonButton(name, macroText, anchorFram
     moverFrame:SetFrameLevel(button:GetFrameLevel() + 10)
     moverFrame:SetPoint("TOPLEFT", button, "TOPLEFT", 16, 0)
     moverFrame:SetPoint("TOPRIGHT", button, "TOPRIGHT", -16, 0)
-    moverFrame:SetHeight(10)
+    moverFrame:SetHeight(1)
 
     moverFrame:EnableMouse(true)
     moverFrame:RegisterForDrag("LeftButton")

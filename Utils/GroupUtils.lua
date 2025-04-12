@@ -1,11 +1,11 @@
 -- Utils/GroupUtils.lua
-SummonHelperGroupUtils = {}
+EasySummonGroupUtils = {}
 
-function SummonHelperGroupUtils:IsInRaid()
+function EasySummonGroupUtils:IsInRaid()
     return IsInRaid()
 end
 
-function SummonHelperGroupUtils:IsInstanceZone(zoneName)
+function EasySummonGroupUtils:IsInstanceZone(zoneName)
     if not zoneName or zoneName == "" then return false end
     
     -- These zones might be reported as instances but aren't truly instanced
@@ -43,7 +43,7 @@ function SummonHelperGroupUtils:IsInstanceZone(zoneName)
     return false
 end
 
-function SummonHelperGroupUtils:GetGroupMembers()
+function EasySummonGroupUtils:GetGroupMembers()
     local members = {}
     local playerName = UnitName("player")
     local isInRaid = IsInRaid()

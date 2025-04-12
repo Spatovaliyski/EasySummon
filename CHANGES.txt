@@ -1,28 +1,10 @@
-lightweight tag af96ddc3f4698c25f00512da93e9f016c744708f 1.0.0
-Author:	GitHub <noreply@github.com>
-Date:	Mon Apr 7 00:07:07 2025 +0300
+lightweight tag a43a23e8a32887bba274d10c93c1e1ad8fa45fe5 1.0.2
+Author:	Spatovaliyski <martinspatovaliyski@gmail.com>
+Date:	Wed Apr 9 20:17:48 2025 +0300
 
-commit 97ca01c4f74b235b333262782327d0969da234be
+commit a43a23e8a32887bba274d10c93c1e1ad8fa45fe5
 Author: Spatovaliyski <martinspatovaliyski@gmail.com>
-Date:   Mon Apr 7 00:06:35 2025 +0300
+Date:   Wed Apr 9 20:17:48 2025 +0300
 
-    Update summon button, now attached to the frame
-
-commit 97ca01c4f74b235b333262782327d0969da234be
-Author: Spatovaliyski <martinspatovaliyski@gmail.com>
-Date:   Mon Apr 7 00:06:35 2025 +0300
-
-    Update summon button, now attached to the frame
-
-commit 0e46b0eeede9d40aba9cb5cbef8b1e717be591b0
-Author: Spatovaliyski <martinspatovaliyski@gmail.com>
-Date:   Sun Apr 6 23:51:39 2025 +0300
-
-    Rework UI
-
-commit d4ed4615d33d081f2fa4112f205498a5f43ca241
-Author: Spatovaliyski <martinspatovaliyski@gmail.com>
-Date:   Sun Apr 6 21:20:28 2025 +0300
-
-    Update UI
+    Adjust scroll bar, add support for 1.15.7
 
