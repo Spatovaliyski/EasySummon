@@ -19,7 +19,7 @@ EasySummonConfig = {
       "summon me",
   },
 
-  NotifyWhenHidden = false,
+  --NotifyWhenHidden = false,
   
   -- Colors
   Colors = {
