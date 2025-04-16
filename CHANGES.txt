@@ -1,10 +1,16 @@
-lightweight tag a43a23e8a32887bba274d10c93c1e1ad8fa45fe5 1.0.2
+lightweight tag 0f66e8b57aceaf02383d086964d357c146b5adf1 1.0.3
 Author:	Spatovaliyski <martinspatovaliyski@gmail.com>
-Date:	Wed Apr 9 20:17:48 2025 +0300
+Date:	Sat Apr 12 19:06:05 2025 +0300
 
-commit a43a23e8a32887bba274d10c93c1e1ad8fa45fe5
+commit 0f66e8b57aceaf02383d086964d357c146b5adf1
 Author: Spatovaliyski <martinspatovaliyski@gmail.com>
-Date:   Wed Apr 9 20:17:48 2025 +0300
+Date:   Sat Apr 12 19:06:05 2025 +0300
 
-    Adjust scroll bar, add support for 1.15.7
+    Remove notify checkbox (wip)
+
+commit 6500a80a1c5cada0aaa060f962b13f47ab6872ca
+Author: Spatovaliyski <martinspatovaliyski@gmail.com>
+Date:   Sat Apr 12 19:00:17 2025 +0300
+
+    Rename addon to Easy Summon
 

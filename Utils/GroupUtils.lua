@@ -150,3 +150,26 @@ function EasySummonGroupUtils:GetGroupMembers()
     
     return members
 end
+
+function EasySummonGroupUtils:UpdateGroupSizeText()
+    if not EasySummonUI.groupSizeText then return end
+    
+    local groupSize = 0
+    local maxSize = 5
+    local groupType = "Party"
+    
+    if IsInRaid() then
+        groupSize = GetNumGroupMembers()
+        maxSize = 40
+        groupType = "Raid"
+    elseif IsInGroup() then
+        groupSize = GetNumGroupMembers()
+        maxSize = 5
+        groupType = "Party"
+    else
+        EasySummonUI.groupSizeText:SetText("Not in a group")
+        return
+    end
+    
+    EasySummonUI.groupSizeText:SetText(string.format("%s: %d/%d", groupType, groupSize, maxSize))
+end

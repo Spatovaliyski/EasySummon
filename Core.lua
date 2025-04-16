@@ -148,11 +148,10 @@ local function InitializeAddon()
 end
 
 -- Register slash commands
-SLASH_SCOMMAND1 = "/easysummon"
-SLASH_SCOMMAND3 = "/summon"
-SLASH_SCOMMAND2 = "/es"
-SLASH_SCOMMAND4 = "/sh" -- Legacy
-SlashCmdList["SCOMMAND"] = function()
+SLASH_SCMD1 = "/easysummon"
+SLASH_SCMD2 = "/es"
+SLASH_SCMD3 = "/summon"
+SlashCmdList["SCMD"] = function()
     if InCombatLockdown() then
         print("|cFFFFCC00EasySummon:|r Cannot open during combat. Will open when combat ends.")
     

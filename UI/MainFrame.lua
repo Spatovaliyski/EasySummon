@@ -4,6 +4,17 @@ EasySummonUI = {}
 function EasySummonUI:Initialize()
     self:CreateMainFrame()
     self.frame:Hide()
+
+    self.frame:RegisterEvent("GROUP_ROSTER_UPDATE")
+    self.frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+    
+    self.frame:SetScript("OnEvent", function(_, event, ...)
+        if event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ENTERING_WORLD" then
+            if self.frame:IsShown() then
+                EasySummonGroupUtils:UpdateGroupSizeText()
+            end
+        end
+    end)
 end
 
 function EasySummonUI:CreateMainFrame()
@@ -24,6 +35,12 @@ function EasySummonUI:CreateMainFrame()
     -- Set the frame title
     frame.TitleText:SetText("Easy Summon v" .. GetAddOnMetadata("EasySummon", "Version"))
     frame.portrait:SetTexture("Interface\\AddOns\\EasySummon\\Textures\\logo")
+
+    -- Group size text display
+    local groupSizeText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    groupSizeText:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -10, -45)
+    groupSizeText:SetText("Group: 0/0")
+    self.groupSizeText = groupSizeText
 
     -- Reset button
     local resetButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
@@ -58,8 +75,11 @@ function EasySummonUI:CreateMainFrame()
         if _G.EasySummonCore then
             _G.EasySummonCore:SetActive(true)
             _G.EasySummonCore:UpdateRaidList()
+            EasySummonGroupUtils:UpdateGroupSizeText()
         end
     end)
+
+
 
     frame:SetScript("OnHide", function()
         if EasySummonSummonButton and EasySummonSummonButton.button then
@@ -101,5 +121,6 @@ function EasySummonUI:ToggleMainFrame()
         end
     else
         self.frame:Show()
+        EasySummonGroupUtils:UpdateGroupSizeText()
     end
 end
