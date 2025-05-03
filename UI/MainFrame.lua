@@ -52,23 +52,19 @@ function EasySummonUI:CreateMainFrame()
         _G.EasySummonCore:ResetResponses()
     end)
     
-    -- Notification (when frame is hidden) checkbox
-    -- local notifyCheckbox = CreateFrame("CheckButton", "EasySummonNotifyCheckbox", frame, "UICheckButtonTemplate")
-    -- notifyCheckbox:SetSize(24, 24)
-    -- notifyCheckbox:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -120, 3)
-    -- notifyCheckbox:SetFrameLevel(frame:GetFrameLevel() + 10)
-    -- if EasySummonConfig.NotifyWhenHidden == nil then
-    --     EasySummonConfig.NotifyWhenHidden = false
-    -- end
-    -- notifyCheckbox:SetChecked(EasySummonConfig.NotifyWhenHidden)
+    local notifyCheckbox = CreateFrame("CheckButton", "EasySummonNotifyCheckbox", frame, "UICheckButtonTemplate")
+    notifyCheckbox:SetSize(24, 24)
+    notifyCheckbox:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -180, 3)
+    notifyCheckbox:SetFrameLevel(frame:GetFrameLevel() + 10)
+    notifyCheckbox:SetChecked(EasySummonConfig.NotifyWhenHidden)
     
-    -- -- Set checkbox text and tooltip
-    -- _G[notifyCheckbox:GetName() .. "Text"]:SetText("Notify when hidden")
+    -- checkbox text
+    _G[notifyCheckbox:GetName() .. "Text"]:SetText("Show toast on summon request")
     
-    -- -- Hook up the checkbox functionality
-    -- notifyCheckbox:SetScript("OnClick", function(self)
-    --     EasySummonConfig.NotifyWhenHidden = self:GetChecked()
-    -- end)
+    -- checkbox hookup
+    notifyCheckbox:SetScript("OnClick", function(self)
+        EasySummonConfig.NotifyWhenHidden = self:GetChecked()
+    end)
     
     -- Add OnShow handling
     frame:SetScript("OnShow", function()
@@ -78,8 +74,6 @@ function EasySummonUI:CreateMainFrame()
             EasySummonGroupUtils:UpdateGroupSizeText()
         end
     end)
-
-
 
     frame:SetScript("OnHide", function()
         if EasySummonSummonButton and EasySummonSummonButton.button then

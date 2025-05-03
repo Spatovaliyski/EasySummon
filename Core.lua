@@ -21,7 +21,7 @@ function EasySummon:InitializeEvents()
     self.frame:RegisterEvent("CHAT_MSG_RAID_WARNING")
     
     self.frame:SetScript("OnEvent", function(_, event, ...)
-        if not self.isActive and event ~= "GROUP_ROSTER_UPDATE" then
+        if not self.isActive and event == "GROUP_ROSTER_UPDATE" then
             return
         end
 
@@ -85,19 +85,33 @@ function EasySummon:UpdateRaidList()
 end
 
 function EasySummon:CheckForSummonRequest(event, msg, sender)
-    if not self.isActive then
-        return
-    end
-    
     local playerName = EasySummonTextUtils:GetPlayerNameWithoutRealm(sender)
     if self:IsSummonRequest(msg, event) then
+        -- Always process summon requests for notification purposes
         if self.playerResponses[playerName] then
             return  -- Ignore if already responded
         end
         
-        self.playerResponses[playerName] = true
-        PlaySound(SOUNDKIT.READY_CHECK, "Master")
-        self:UpdateRaidList()
+        -- Only process the request if:
+        -- 1. The frame is visible, OR
+        -- 2. NotifyWhenHidden is enabled
+        if EasySummonUI.frame:IsShown() or EasySummonConfig.NotifyWhenHidden then
+            self.playerResponses[playerName] = true
+            
+            if not EasySummonUI.frame:IsShown() and EasySummonConfig.NotifyWhenHidden then
+                if EasySummonToast then
+                    EasySummonToast:Show(playerName)
+                end
+            else
+                -- Just play sound if window is open
+                PlaySound(SOUNDKIT.READY_CHECK, "Dialog")
+            end
+            
+            -- Only update raid list if active
+            if self.isActive then
+                self:UpdateRaidList()
+            end
+        end
     end
 end
 
@@ -110,7 +124,8 @@ function EasySummon:IsSummonRequest(msg, event)
         "^attempting to summon",
         "^summoning ",
         "^need a summon?",
-        "^123 for summons"
+        "^123 for summons",
+        "^123 for summ",
     }
     
     for _, pattern in ipairs(ignorePhrases) do
@@ -118,6 +133,7 @@ function EasySummon:IsSummonRequest(msg, event)
             return false
         end
     end
+ 
     
     for _, phrase in ipairs(EasySummonConfig.SummonPhrases) do
         if lowerMsg == phrase then
@@ -130,12 +146,34 @@ end
 
 -- Global initialization
 local function InitializeAddon()
+    if not EasySummonToast then
+        print("EasySummonToast not found, creating it")
+        EasySummonToast = {}
+        EasySummonToast.Initialize = function() 
+            -- (copy the Initialize function from Toast.lua)
+        end
+        EasySummonToast.Show = function(self, playerName)
+            -- (copy the Show function from Toast.lua)
+        end
+    end
+    
+    if EasySummonToast and EasySummonToast.Initialize then
+        print("Initializing EasySummonToast")
+        EasySummonToast:Initialize()
+    end
+
     _G.EasySummonCore = EasySummon:New()
 
     -- Delay UI init
     C_Timer.After(0.5, function()
         if EasySummonUI and EasySummonUI.Initialize then
             EasySummonUI:Initialize()
+            
+            -- Initialize toast notification system
+            if EasySummonToast and EasySummonToast.Initialize then
+                EasySummonToast:Initialize()
+            end
+            
             print("|cFF33FF33EasySummon:|r initialized")
             
             if _G.EasySummonCore and _G.EasySummonCore.UpdateRaidList then
