@@ -27,7 +27,7 @@ function EasySummonToast:Initialize()
     -- Create title
     local title = toast:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     title:SetPoint("TOP", 0, -15)
-    title:SetText("EasySummon")
+    title:SetText("Easy Summon")
     
     -- Create message text
     local message = toast:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -84,7 +84,7 @@ function EasySummonToast:Initialize()
     
     local infoText = toast:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     infoText:SetPoint("BOTTOM", 0, 12)
-    infoText:SetText("Click to open EasySummon")
+    infoText:SetText("Click to open Easy Summon")
     infoText:SetTextColor(0.7, 0.7, 0.7)
 end
 
