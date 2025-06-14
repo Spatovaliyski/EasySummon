@@ -2,7 +2,7 @@
 ## Title: Easy Summon
 ## Notes: Helps Warlocks manage summons
 ## Author: Limitedby
-## Version: 1.1.0
+## Version: 1.2.1
 ## SavedVariables: EasySummonConfig
 
 Config.lua

@@ -26,6 +26,8 @@ local defaults = {
     "lock sum",
     "lock port",
     "lock summon",
+    "any sum",
+    "any summon",
   },
   
   -- Colors
