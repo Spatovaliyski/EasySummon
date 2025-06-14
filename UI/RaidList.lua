@@ -7,6 +7,52 @@ function EasySummonCore:UpdateRaidList()
     EasySummonRaidList:UpdateList(self.playerResponses)
 end
 
+function EasySummonRaidList:LoadTestData()
+    -- Store original function
+    if not EasySummonGroupUtils._GetGroupMembers then
+        EasySummonGroupUtils._GetGroupMembers = EasySummonGroupUtils.GetGroupMembers
+    end
+    
+    -- Override with test data
+    EasySummonGroupUtils.GetGroupMembers = function()
+        -- Get real player info - the addon will add this automatically
+        local members = {}
+        
+        -- Add 10 fake players
+        local classes = {"WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID"}
+        
+        for i = 1, 20 do
+            local classIndex = ((i-1) % #classes) + 1
+            
+            table.insert(members, {
+                name = "Player " .. i,
+                class = classes[classIndex],
+                isPlayer = false,
+                isInInstance = false,
+                inRange = i % 3 == 0, -- Every third player is in range
+                zone = "Darnassus"
+            })
+            
+            -- Make some players request summons
+            if i % 4 == 0 then
+                if _G.EasySummonCore and _G.EasySummonCore.playerResponses then
+                    _G.EasySummonCore.playerResponses["Player " .. i] = true
+                end
+            end
+        end
+        
+        return members
+    end
+    
+    -- Update the raid list immediately
+    if _G.EasySummonCore then
+        _G.EasySummonCore:UpdateRaidList()
+    end
+    
+    print("|cFF33FF33EasySummon:|r Test data loaded with 10 players")
+end
+
+
 function EasySummonRaidList:UpdateList(playerResponses)
     for i, button in ipairs(self.buttons) do
         button:Hide()

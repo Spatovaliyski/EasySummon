@@ -7,7 +7,6 @@ function EasySummonToast:Initialize()
     toast:SetPoint("CENTER", 0, 100)
     toast:SetFrameStrata("FULLSCREEN_DIALOG") 
     toast:SetFrameLevel(9999) -- High level, its prio
-    toast:SetFrameLevel(100)
     toast:EnableMouse(true)
     toast:SetMovable(true)
     toast:RegisterForDrag("LeftButton")

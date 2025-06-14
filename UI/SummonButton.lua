@@ -33,24 +33,38 @@ function EasySummonSummonButton:DoSummon(name, anchorFrame)
     -- Create the summoning button, passing the anchor frame
     self:CreateSummonButton(name, macroText, anchorFrame)
 end
-  
+
 function EasySummonSummonButton:CreateSummonButton(name, macroText, anchorFrame)
-    local button = CreateFrame("Button", "EasySummonQuickButton", UIParent, "SecureActionButtonTemplate")
+    -- Get the scroll frame
+    local scrollFrame = _G["EasySummonScrollFrame"]
+    
+    -- Create button as a direct child of the scroll frame (not UIParent)
+    -- This ensures it respects the scroll frame's boundaries
+    local button = CreateFrame("Button", "EasySummonQuickButton", scrollFrame, "SecureActionButtonTemplate")
 
     button:SetFrameStrata("HIGH")
-    button:SetFrameLevel(101)
+    button:SetFrameLevel(100) -- High enough to be above list items
     button:SetSize(120, 30)
     
     if anchorFrame then
-        button:SetPoint("LEFT", anchorFrame, "RIGHT", -120, 0)
+        local point, relativeTo, relativePoint, xOfs, yOfs = anchorFrame:GetPoint()
+        
+        local buttonX = -120
+        local buttonY = 0
+        
+        button:SetPoint("LEFT", anchorFrame, "RIGHT", buttonX, buttonY)
     else
-        button:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        -- Default position
+        button:SetPoint("CENTER", scrollFrame, "CENTER", 0, 0)
     end
     
-    -- Set attributes AFTER positioning (ONLY ONCE)
+    -- Set attributes for macro functionality
     button:SetAttribute("type", "macro")
     button:SetAttribute("macrotext", macroText)
 
+    -- Rest of your button setup code...
+    -- (textures, text, close button, etc.)
+    
     -- Apply visual styling to match UIPanelButtonTemplate
     local ntex = button:CreateTexture()
     ntex:SetTexture("Interface/Buttons/UI-Panel-Button-Up")
@@ -84,49 +98,53 @@ function EasySummonSummonButton:CreateSummonButton(name, macroText, anchorFrame)
         button:Hide() 
         self.button = nil
     end)
-
-    -- Make button movable
-    button:SetMovable(true)
-    button:SetClampedToScreen(true)
-
-    -- Create drag handle
-    local moverFrame = CreateFrame("Frame", nil, button)
-    moverFrame:SetFrameLevel(button:GetFrameLevel() + 10)
-    moverFrame:SetPoint("TOPLEFT", button, "TOPLEFT", 16, 0)
-    moverFrame:SetPoint("TOPRIGHT", button, "TOPRIGHT", -16, 0)
-    moverFrame:SetHeight(1)
-
-    moverFrame:EnableMouse(true)
-    moverFrame:RegisterForDrag("LeftButton")
-    moverFrame:SetScript("OnDragStart", function() button:StartMoving() end)
-    moverFrame:SetScript("OnDragStop", function() button:StopMovingOrSizing() end)
-
-    -- Add visual cue for drag area
-    local dragTexture = moverFrame:CreateTexture(nil, "OVERLAY")
-    dragTexture:SetAllPoints()
-    dragTexture:SetColorTexture(0.4, 0.4, 0.4, 0.1)
-
-    -- Add tooltips
-    moverFrame:SetScript("OnEnter", function()
-        GameTooltip:SetOwner(moverFrame, "ANCHOR_TOP")
-        GameTooltip:AddLine("Drag from here to move the button")
-        GameTooltip:Show()
-    end)
-
-    moverFrame:SetScript("OnLeave", function()
-        GameTooltip:Hide()
-    end)
-
-    button:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_TOP")
-        GameTooltip:AddLine("Click to summon " .. name)
-        GameTooltip:AddLine("This will target them and cast Ritual of Summoning", 1, 1, 1)
-        GameTooltip:Show()
-    end)
-
-    button:SetScript("OnLeave", function()
-        GameTooltip:Hide()
-    end)
+    
+    -- Visibility check - hide button if it gets scrolled out of view
+    if scrollFrame then
+        scrollFrame:HookScript("OnVerticalScroll", function(self, offset)
+            if button and button:IsShown() then
+                local buttonTop = button:GetTop()
+                local buttonBottom = button:GetBottom()
+                local frameTop = scrollFrame:GetTop()
+                local frameBottom = scrollFrame:GetBottom()
+                
+                local bufferZone = 25
+                
+                if buttonBottom > frameTop - bufferZone or buttonTop < frameBottom + bufferZone then
+                    button:Hide()
+                    C_Timer.After(0.1, function()
+                        if self.button == button then
+                            self.button = nil
+                        end
+                    end)
+                else
+                    button:Show()
+                end
+            end
+        end)
+        
+        scrollFrame:HookScript("OnScrollRangeChanged", function()
+            if button and button:IsShown() then
+                local buttonTop = button:GetTop()
+                local buttonBottom = button:GetBottom()
+                local frameTop = scrollFrame:GetTop()
+                local frameBottom = scrollFrame:GetBottom()
+                
+                local bufferZone = 25
+                
+                if buttonBottom > frameTop - bufferZone or buttonTop < frameBottom + bufferZone then
+                    button:Hide()
+                    C_Timer.After(0.1, function()
+                        if self.button == button then
+                            self.button = nil
+                        end
+                    end)
+                else
+                    button:Show()
+                end
+            end
+        end)
+    end
 
     -- Auto-hide after 20 seconds
     C_Timer.After(20, function() 

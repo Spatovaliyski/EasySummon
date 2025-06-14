@@ -207,10 +207,20 @@ SlashCmdList["SCMD"] = function()
         
         -- Set flag to open when combat ends
         EasySummon.pendingOpen = true
+
+        -- if Frame already open, then close it
+        if EasySummonUI and EasySummonUI.frame and EasySummonUI.frame:IsShown() then
+            
+        end
     else
         -- Not in combat, open immediately
         EasySummonUI:ToggleMainFrame()
     end
+end
+
+SLASH_ESSUMMONTEST1 = "/estest"
+SlashCmdList["ESSUMMONTEST"] = function()
+    EasySummonRaidList:LoadTestData()
 end
 
 -- Call initialization when addon loads
