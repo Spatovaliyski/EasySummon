@@ -49,7 +49,7 @@ function EasySummonRaidList:LoadTestData()
         _G.EasySummonCore:UpdateRaidList()
     end
     
-    print("|cFF33FF33EasySummon:|r Test data loaded with 10 players")
+    print("|cFF33FF33EasySummon:|r Test data loaded with 20 players")
 end
 
 
