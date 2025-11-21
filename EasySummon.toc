@@ -2,7 +2,7 @@
 ## Title: Easy Summon
 ## Notes: Helps Warlocks manage summons
 ## Author: Limitedby
-## Version: 1.2.1
+## Version: 1.2.2
 ## SavedVariables: EasySummonConfig
 
 Config.lua
@@ -11,5 +11,6 @@ Utils\GroupUtils.lua
 UI\Toast.lua
 Core.lua
 UI\MainFrame.lua
+UI\SettingsWindow.lua
 UI\RaidList.lua
 UI\SummonButton.lua
