@@ -18,7 +18,6 @@ function EasySummonSettingsWindow:CreateSettingsFrame()
 	frame.TitleBg:SetHeight(30)
 	frame.TitleText:SetText("Custom Phrases")
 
-	-- Close button is already part of BasicFrameTemplateWithInset
 	frame.CloseButton:SetScript("OnClick", function()
 		EasySummonSettingsWindow:Hide()
 	end)
@@ -52,20 +51,96 @@ function EasySummonSettingsWindow:CreateSettingsFrame()
 	instructionsText:SetPoint("TOPLEFT", frame, "TOPLEFT", 15, -90)
 	instructionsText:SetWidth(250)
 	instructionsText:SetJustifyH("LEFT")
-	instructionsText:SetText("|cFFFFCC00Click|r to delete a phrase")
+	instructionsText:SetText("Click to delete a phrase")
 
 	-- List of phrases
 	local listLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	listLabel:SetPoint("TOPLEFT", frame, "TOPLEFT", 15, -115)
 	listLabel:SetText("Your Phrases:")
 
-	-- Simple list container (no scroll frame, just display)
-	local listContainer = CreateFrame("Frame", "EasySummonPhraseListContainer", frame)
-	listContainer:SetPoint("TOPLEFT", frame, "TOPLEFT", 15, -135)
-	listContainer:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -15, 10)
+	-- Create scroll frame for phrases with inset
+	local inset = CreateFrame("Frame", nil, frame, "InsetFrameTemplate3")
+	inset:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -135)
+	inset:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -10, 5)
+
+	local scrollFrame = CreateFrame("ScrollFrame", "EasySummonSettingsScrollFrame", inset, "UIPanelScrollFrameTemplate")
+	scrollFrame:SetPoint("TOPLEFT", inset, "TOPLEFT", 3, -3)
+	scrollFrame:SetPoint("BOTTOMRIGHT", inset, "BOTTOMRIGHT", -27, 3)
+
+	scrollFrame.targetScrollValue = 0
+	scrollFrame.scrollDuration = 0.15
+	scrollFrame.scrollElapsed = 0
+	scrollFrame.scrollStartValue = 0
+	scrollFrame.scrollIsAnimating = false
+
+	scrollFrame:EnableMouseWheel(true)
+	scrollFrame:SetScript("OnMouseWheel", function(self, delta)
+		local scrollAmount = 25
+		local targetValue = self.scrollIsAnimating and self.targetScrollValue or self:GetVerticalScroll()
+
+		if delta < 0 then
+			targetValue = targetValue + scrollAmount
+		else
+			targetValue = targetValue - scrollAmount
+		end
+
+		targetValue = math.max(0, math.min(targetValue, self:GetVerticalScrollRange()))
+
+		self.scrollStartValue = self:GetVerticalScroll()
+		self.targetScrollValue = targetValue
+		self.scrollElapsed = 0
+		self.scrollIsAnimating = true
+	end)
+
+	scrollFrame:SetScript("OnUpdate", function(self, elapsed)
+		if not self.scrollIsAnimating then
+			return
+		end
+
+		self.scrollElapsed = self.scrollElapsed + elapsed
+		local progress = math.min(self.scrollElapsed / self.scrollDuration, 1)
+		local smoothedProgress = 1 - (1 - progress) * (1 - progress)
+
+		local newPosition = self.scrollStartValue + (self.targetScrollValue - self.scrollStartValue) * smoothedProgress
+		self:SetVerticalScroll(newPosition)
+
+		if progress >= 1 then
+			self.scrollIsAnimating = false
+		end
+	end)
+
+	scrollFrame.ScrollBar:ClearAllPoints()
+	scrollFrame.ScrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 7, -16)
+	scrollFrame.ScrollBar:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", 7, 16)
+
+	local scrollUpButton = _G[scrollFrame:GetName() .. "ScrollBarScrollUpButton"]
+	if scrollUpButton then
+		scrollUpButton:ClearAllPoints()
+		scrollUpButton:SetPoint("BOTTOM", scrollFrame.ScrollBar, "TOP", 1, -1)
+	end
+
+	local scrollDownButton = _G[scrollFrame:GetName() .. "ScrollBarScrollDownButton"]
+	if scrollDownButton then
+		scrollDownButton:ClearAllPoints()
+		scrollDownButton:SetPoint("TOP", scrollFrame.ScrollBar, "BOTTOM", 1, -1)
+	end
+
+	local thumb = _G[scrollFrame:GetName() .. "ScrollBarThumbTexture"]
+	if thumb then
+		thumb:SetWidth(18)
+		thumb:ClearAllPoints()
+		thumb:SetPoint("RIGHT", scrollFrame.ScrollBar, "RIGHT", 1.8, 0)
+	end
+
+	-- Create scroll child
+	local listContainer = CreateFrame("Frame", "EasySummonPhraseListContainer", scrollFrame)
+	local w, h = scrollFrame:GetSize()
+	listContainer:SetSize(w, h)
+	scrollFrame:SetScrollChild(listContainer)
 
 	self.frame = frame
 	self.inputBox = inputBox
+	self.scrollFrame = scrollFrame
 	self.listContainer = listContainer
 	self.phraseButtons = {}
 end
@@ -119,16 +194,28 @@ function EasySummonSettingsWindow:RefreshPhraseList()
 
 	local itemHeight = 20
 	local yOffset = 0
+	local scrollFrame = _G["EasySummonSettingsScrollFrame"]
+	local listContainer = self.listContainer
+
+	-- Set scroll child height based on number of phrases
+	local totalHeight = math.max(#EasySummonConfig.CustomPhrases * itemHeight, scrollFrame:GetHeight())
+	listContainer:SetHeight(totalHeight)
 
 	-- Create or update phrase buttons
 	for i, phrase in ipairs(EasySummonConfig.CustomPhrases) do
 		local button = self.phraseButtons[i]
 
 		if not button then
-			button = CreateFrame("Button", "EasySummonSettingsPhrase" .. i, self.listContainer)
+			button = CreateFrame("Button", "EasySummonSettingsPhrase" .. i, listContainer)
 			button:SetSize(250, itemHeight)
-			button:SetFrameLevel(self.listContainer:GetFrameLevel() + 1)
+			button:SetFrameLevel(listContainer:GetFrameLevel() + 1)
 			button:RegisterForClicks("AnyUp")
+
+			-- Create background texture for hover effect
+			local backgroundTexture = button:CreateTexture(nil, "BACKGROUND")
+			backgroundTexture:SetAllPoints(button)
+			backgroundTexture:SetColorTexture(0.3, 0.3, 0.5, 0)
+			button.backgroundTexture = backgroundTexture
 
 			-- Create phrase text
 			local phraseText = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -145,11 +232,13 @@ function EasySummonSettingsWindow:RefreshPhraseList()
 			-- Set up hover
 			button:SetScript("OnEnter", function(self)
 				self.phraseText:SetTextColor(1, 1, 1, 1)
+				self.backgroundTexture:SetAlpha(0.3)
 				SetCursor("INTERACT_CURSOR")
 			end)
 
 			button:SetScript("OnLeave", function(self)
 				self.phraseText:SetTextColor(0.8, 0.8, 0.8, 1)
+				self.backgroundTexture:SetAlpha(0)
 				ResetCursor()
 			end)
 
@@ -157,7 +246,7 @@ function EasySummonSettingsWindow:RefreshPhraseList()
 		end
 
 		-- Position the button
-		button:SetPoint("TOPLEFT", self.listContainer, "TOPLEFT", 0, -yOffset)
+		button:SetPoint("TOPLEFT", listContainer, "TOPLEFT", 0, -yOffset)
 		button.phraseText:SetText('• "' .. phrase .. '"')
 		button.phraseText:SetTextColor(0.8, 0.8, 0.8, 1)
 		button.phraseData = phrase
@@ -169,8 +258,8 @@ function EasySummonSettingsWindow:RefreshPhraseList()
 	-- Show message if no phrases
 	if #EasySummonConfig.CustomPhrases == 0 then
 		if not self.emptyText then
-			self.emptyText = self.listContainer:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-			self.emptyText:SetPoint("CENTER", self.listContainer, "CENTER", 0, 0)
+			self.emptyText = listContainer:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+			self.emptyText:SetPoint("CENTER", listContainer, "CENTER", 0, 0)
 			self.emptyText:SetTextColor(0.5, 0.5, 0.5, 1)
 		end
 		self.emptyText:SetText("No custom phrases yet")
