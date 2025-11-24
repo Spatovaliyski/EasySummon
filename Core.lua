@@ -133,19 +133,10 @@ function EasySummon:IsSummonRequest(msg, event)
 		end
 	end
 
-	-- Check default summon phrases
-	for _, phrase in ipairs(EasySummonConfig.SummonPhrases) do
+	-- Check summon keywords
+	for _, phrase in ipairs(EasySummonConfig.SummonKeywords) do
 		if lowerMsg == phrase then
 			return true
-		end
-	end
-
-	-- Check custom summon phrases
-	if EasySummonConfig.CustomPhrases then
-		for _, phrase in ipairs(EasySummonConfig.CustomPhrases) do
-			if lowerMsg == phrase then
-				return true
-			end
 		end
 	end
 
@@ -154,22 +145,6 @@ end
 
 -- Global initialization
 local function InitializeAddon()
-	if not EasySummonToast then
-		print("EasySummonToast not found, creating it")
-		EasySummonToast = {}
-		EasySummonToast.Initialize = function()
-			-- (copy the Initialize function from Toast.lua)
-		end
-		EasySummonToast.Show = function(self, playerName)
-			-- (copy the Show function from Toast.lua)
-		end
-	end
-
-	if EasySummonToast and EasySummonToast.Initialize then
-		print("Initializing EasySummonToast")
-		EasySummonToast:Initialize()
-	end
-
 	_G.EasySummonCore = EasySummon:New()
 
 	-- Delay UI init
@@ -177,12 +152,10 @@ local function InitializeAddon()
 		if EasySummonUI and EasySummonUI.Initialize then
 			EasySummonUI:Initialize()
 
-			-- Initialize settings window
 			if EasySummonSettingsWindow and EasySummonSettingsWindow.Initialize then
 				EasySummonSettingsWindow:Initialize()
 			end
 
-			-- Initialize toast notification system
 			if EasySummonToast and EasySummonToast.Initialize then
 				EasySummonToast:Initialize()
 			end
@@ -225,7 +198,6 @@ SlashCmdList["SCMD"] = function()
 		if EasySummonUI and EasySummonUI.frame and EasySummonUI.frame:IsShown() then
 		end
 	else
-		-- Not in combat, open immediately
 		EasySummonUI:ToggleMainFrame()
 	end
 end

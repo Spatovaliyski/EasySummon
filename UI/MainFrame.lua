@@ -109,7 +109,6 @@ function EasySummonUI:CreateMainFrame()
 	end)
 
 	self.frame = frame
-	--self.notifyCheckbox = notifyCheckbox
 	self:CreateScrollFrame()
 end
 

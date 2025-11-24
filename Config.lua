@@ -7,8 +7,8 @@ local defaults = {
 
 	NotifyWhenHidden = false,
 
-	-- Summoning phrases to detect
-	SummonPhrases = {
+	-- Summoning keywords (default list + custom ones added by player)
+	SummonKeywords = {
 		"123",
 		"+",
 		"++",
@@ -29,9 +29,6 @@ local defaults = {
 		"any sum",
 		"any summon",
 	},
-
-	-- Custom summoning phrases added by the player
-	CustomPhrases = {},
 
 	-- Colors
 	Colors = {

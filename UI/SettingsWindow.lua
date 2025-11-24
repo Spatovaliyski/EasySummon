@@ -16,7 +16,7 @@ function EasySummonSettingsWindow:CreateSettingsFrame()
 
 	-- Set the frame title
 	frame.TitleBg:SetHeight(30)
-	frame.TitleText:SetText("Custom Phrases")
+	frame.TitleText:SetText("Summon Keywords")
 
 	frame.CloseButton:SetScript("OnClick", function()
 		EasySummonSettingsWindow:Hide()
@@ -52,6 +52,16 @@ function EasySummonSettingsWindow:CreateSettingsFrame()
 	instructionsText:SetWidth(250)
 	instructionsText:SetJustifyH("LEFT")
 	instructionsText:SetText("Click to delete a phrase")
+
+	-- Import button
+	local importButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+	importButton:SetSize(50, 21)
+	importButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -15, -90)
+	importButton:SetText("Import")
+	importButton:SetFrameLevel(frame:GetFrameLevel() + 10)
+	importButton:SetScript("OnClick", function()
+		EasySummonSettingsWindow:ImportDefaults()
+	end)
 
 	-- List of phrases
 	local listLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -157,7 +167,7 @@ function EasySummonSettingsWindow:AddPhrase()
 	phrase = string.lower(phrase)
 
 	-- Check if phrase already exists
-	for _, existingPhrase in ipairs(EasySummonConfig.CustomPhrases) do
+	for _, existingPhrase in ipairs(EasySummonConfig.SummonKeywords) do
 		if existingPhrase == phrase then
 			print("|cFFFF3333EasySummon:|r Phrase already exists: " .. phrase)
 			return
@@ -165,7 +175,7 @@ function EasySummonSettingsWindow:AddPhrase()
 	end
 
 	-- Add the phrase
-	table.insert(EasySummonConfig.CustomPhrases, phrase)
+	table.insert(EasySummonConfig.SummonKeywords, phrase)
 	self.inputBox:SetText("")
 	self.inputBox:ClearFocus()
 
@@ -176,9 +186,9 @@ function EasySummonSettingsWindow:AddPhrase()
 end
 
 function EasySummonSettingsWindow:RemovePhrase(phrase)
-	for i, existingPhrase in ipairs(EasySummonConfig.CustomPhrases) do
+	for i, existingPhrase in ipairs(EasySummonConfig.SummonKeywords) do
 		if existingPhrase == phrase then
-			table.remove(EasySummonConfig.CustomPhrases, i)
+			table.remove(EasySummonConfig.SummonKeywords, i)
 			print("|cFF33FF33EasySummon:|r Removed phrase: " .. phrase)
 			self:RefreshPhraseList()
 			return
@@ -198,11 +208,11 @@ function EasySummonSettingsWindow:RefreshPhraseList()
 	local listContainer = self.listContainer
 
 	-- Set scroll child height based on number of phrases
-	local totalHeight = math.max(#EasySummonConfig.CustomPhrases * itemHeight, scrollFrame:GetHeight())
+	local totalHeight = math.max(#EasySummonConfig.SummonKeywords * itemHeight, scrollFrame:GetHeight())
 	listContainer:SetHeight(totalHeight)
 
 	-- Create or update phrase buttons
-	for i, phrase in ipairs(EasySummonConfig.CustomPhrases) do
+	for i, phrase in ipairs(EasySummonConfig.SummonKeywords) do
 		local button = self.phraseButtons[i]
 
 		if not button then
@@ -256,13 +266,13 @@ function EasySummonSettingsWindow:RefreshPhraseList()
 	end
 
 	-- Show message if no phrases
-	if #EasySummonConfig.CustomPhrases == 0 then
+	if #EasySummonConfig.SummonKeywords == 0 then
 		if not self.emptyText then
 			self.emptyText = listContainer:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 			self.emptyText:SetPoint("CENTER", listContainer, "CENTER", 0, 0)
 			self.emptyText:SetTextColor(0.5, 0.5, 0.5, 1)
 		end
-		self.emptyText:SetText("No custom phrases yet")
+		self.emptyText:SetText("No keywords yet")
 		self.emptyText:Show()
 	else
 		if self.emptyText then
@@ -280,6 +290,62 @@ function EasySummonSettingsWindow:Hide()
 	if self.frame then
 		self.frame:Hide()
 	end
+end
+
+function EasySummonSettingsWindow:ImportDefaults()
+	local defaultKeywords = {
+		"123",
+		"+",
+		"++",
+		"+++",
+		"sum",
+		"summ pls",
+		"summon please",
+		"summon pls",
+		"summon plz",
+		"summon",
+		"summon me",
+		"tp me",
+		"warlock taxi",
+		"lock taxi",
+		"lock sum",
+		"lock port",
+		"lock summon",
+		"any sum",
+		"any summon",
+	}
+
+	local imported = 0
+	local skipped = 0
+
+	for _, keyword in ipairs(defaultKeywords) do
+		local found = false
+		for _, existing in ipairs(EasySummonConfig.SummonKeywords) do
+			if existing == keyword then
+				found = true
+				skipped = skipped + 1
+				break
+			end
+		end
+
+		if not found then
+			table.insert(EasySummonConfig.SummonKeywords, keyword)
+			imported = imported + 1
+		end
+	end
+
+	if imported > 0 then
+		print(
+			"|cFF33FF33EasySummon:|r Imported "
+				.. imported
+				.. " default keywords"
+				.. (skipped > 0 and " (" .. skipped .. " already existed)" or "")
+		)
+	else
+		print("|cFFFFCC00EasySummon:|r All default keywords already exist")
+	end
+
+	self:RefreshPhraseList()
 end
 
 function EasySummonSettingsWindow:Toggle()
