@@ -193,9 +193,9 @@ end
 
 function EasySummonUI:CreateSettingsPanel()
 	local settingsPanel = CreateFrame("Frame", "EasySummonSettingsPanel", self.frame)
-	settingsPanel:SetPoint("TOPLEFT", self.inset, "TOPRIGHT", 10, 0)
-	settingsPanel:SetPoint("BOTTOMLEFT", self.inset, "BOTTOMRIGHT", 10, 0)
-	settingsPanel:SetWidth(270)
+	settingsPanel:SetPoint("TOPLEFT", self.inset, "TOPRIGHT", 5, 0)
+	settingsPanel:SetPoint("BOTTOMLEFT", self.inset, "BOTTOMRIGHT", 5, 0)
+	settingsPanel:SetWidth(265)
 	settingsPanel:Hide()
 
 	-- Notify checkbox
@@ -214,7 +214,7 @@ function EasySummonUI:CreateSettingsPanel()
 	divider:SetHeight(1)
 	divider:SetPoint("LEFT", 15, 0)
 	divider:SetPoint("RIGHT", -15, 0)
-	divider:SetPoint("TOP", notifyCheckbox, "BOTTOM", 0, -10)
+	divider:SetPoint("TOP", notifyCheckbox, "BOTTOM", 0, -5)
 	divider:SetColorTexture(0.3, 0.3, 0.3, 1)
 
 	-- Keywords section title
@@ -249,17 +249,17 @@ function EasySummonUI:CreateSettingsPanel()
 
 	-- Instructions
 	local instructionsText = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	instructionsText:SetPoint("TOPLEFT", inputBox, "BOTTOMLEFT", -5, -5)
-	instructionsText:SetWidth(130)
+	instructionsText:SetPoint("TOPLEFT", inputBox, "BOTTOMLEFT", -5, -10)
+	instructionsText:SetWidth(190)
 	instructionsText:SetJustifyH("LEFT")
 	instructionsText:SetTextColor(0.7, 0.7, 0.7)
-	instructionsText:SetText("Click to delete")
+	instructionsText:SetText("Click a keyword to delete it")
 
 	-- Create scroll frame for keywords
 	local keywordsInset = CreateFrame("Frame", nil, settingsPanel, "InsetFrameTemplate3")
-	keywordsInset:SetPoint("TOPLEFT", instructionsText, "BOTTOMLEFT", -5, -10)
-	keywordsInset:SetPoint("TOPRIGHT", settingsPanel, "TOPRIGHT", -15, 0)
-	keywordsInset:SetHeight(250)
+	keywordsInset:SetPoint("TOPLEFT", instructionsText, "BOTTOMLEFT", 0, -5)
+	keywordsInset:SetPoint("TOPRIGHT", settingsPanel, "TOPRIGHT", -10, 0)
+	keywordsInset:SetHeight(244)
 
 	local keywordsScroll =
 		CreateFrame("ScrollFrame", "EasySummonKeywordsScrollFrame", keywordsInset, "UIPanelScrollFrameTemplate")
@@ -338,7 +338,7 @@ function EasySummonUI:CreateSettingsPanel()
 
 	-- Import button below keywords list
 	local importLabel = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	importLabel:SetPoint("TOPLEFT", keywordsInset, "BOTTOMLEFT", 5, -6)
+	importLabel:SetPoint("TOPLEFT", keywordsInset, "BOTTOMLEFT", 5, -10)
 	importLabel:SetTextColor(0.7, 0.7, 0.7)
 	importLabel:SetText("Import common keywords:")
 
