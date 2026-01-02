@@ -182,7 +182,7 @@ function EasySummonUI:CreateScrollFrame()
 
 	-- phase background
 	local bgTexture = scrollChild:CreateTexture(nil, "BACKGROUND")
-	bgTexture:SetAllPoints(scrollChild)
+	bgTexture:SetAllPoints(scrollFrame)
 	bgTexture:SetTexture("Interface\\AddOns\\EasySummon\\Textures\\art")
 	bgTexture:SetAlpha(0.1)
 
