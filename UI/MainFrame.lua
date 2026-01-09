@@ -1,7 +1,7 @@
--- UI/MainFrame.lua
 EasySummonUI = {}
 
 function EasySummonUI:Initialize()
+	self.viewMode = EasySummonConfig.ViewMode or "list"
 	self:CreateMainFrame()
 	self.frame:Hide()
 
@@ -59,6 +59,17 @@ function EasySummonUI:CreateMainFrame()
 	groupSizeText:SetText("Group: 0/0")
 	self.groupSizeText = groupSizeText
 
+	-- View mode toggle button
+	local viewToggleButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+	viewToggleButton:SetSize(80, 21)
+	viewToggleButton:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -4, 4)
+	viewToggleButton:SetText(self.viewMode == "grid" and "List View" or "Grid View")
+	viewToggleButton:SetFrameLevel(frame:GetFrameLevel() + 10)
+	viewToggleButton:SetScript("OnClick", function()
+		self:ToggleViewMode()
+	end)
+	self.viewToggleButton = viewToggleButton
+
 	-- Reset button
 	local resetButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
 	resetButton:SetSize(100, 21)
@@ -92,6 +103,11 @@ function EasySummonUI:CreateMainFrame()
 	self.frame = frame
 	self:CreateScrollFrame()
 	self:CreateSettingsPanel()
+
+	-- Apply saved view mode dimensions
+	if self.viewMode == "grid" then
+		self:ResizeForGridView()
+	end
 end
 
 function EasySummonUI:CreateScrollFrame()
@@ -180,15 +196,19 @@ function EasySummonUI:CreateScrollFrame()
 	scrollChild:SetSize(w, h)
 	scrollFrame:SetScrollChild(scrollChild)
 
-	-- phase background
-	local bgTexture = scrollChild:CreateTexture(nil, "BACKGROUND")
+	-- phase background - attached to scrollFrame instead of scrollChild
+	local bgTexture = scrollFrame:CreateTexture(nil, "BACKGROUND")
 	bgTexture:SetAllPoints(scrollFrame)
-	bgTexture:SetTexture("Interface\\AddOns\\EasySummon\\Textures\\art")
+	-- Set initial texture based on view mode
+	local textureFile = (self.viewMode == "grid") and "Interface\\AddOns\\EasySummon\\Textures\\artwide"
+		or "Interface\\AddOns\\EasySummon\\Textures\\art"
+	bgTexture:SetTexture(textureFile)
 	bgTexture:SetAlpha(0.1)
 
 	self.scrollFrame = scrollFrame
 	self.scrollChild = scrollChild
 	self.inset = inset
+	self.bgTexture = bgTexture
 end
 
 function EasySummonUI:CreateSettingsPanel()
@@ -362,16 +382,111 @@ function EasySummonUI:ToggleSettings()
 	if self.settingsExpanded then
 		self.settingsExpanded = false
 		self.settingsPanel:Hide()
-		self.frame:SetWidth(EasySummonConfig.FrameWidth)
-		self.inset:SetWidth(EasySummonConfig.FrameWidth - 18)
+
+		-- Restore appropriate width based on view mode
+		if self.viewMode == "grid" then
+			local cellWidth = 155
+			local partySpacing = 4
+			local frameWidth = (cellWidth * 4) + (partySpacing * 3) + 8 + 40
+			self.frame:SetWidth(frameWidth)
+			self.inset:SetWidth(frameWidth - 18)
+		else
+			self.frame:SetWidth(EasySummonConfig.FrameWidth)
+			self.inset:SetWidth(EasySummonConfig.FrameWidth - 18)
+		end
 	else
 		self.settingsExpanded = true
 		self.settingsPanel:Show()
-		self.frame:SetWidth(EasySummonConfig.FrameWidth + 280)
-		self.inset:SetWidth(EasySummonConfig.FrameWidth - 18)
+
+		-- Add settings panel width
+		if self.viewMode == "grid" then
+			local cellWidth = 155
+			local partySpacing = 4
+			local frameWidth = (cellWidth * 4) + (partySpacing * 3) + 8 + 40
+			self.frame:SetWidth(frameWidth + 280)
+			self.inset:SetWidth(frameWidth - 18)
+		else
+			self.frame:SetWidth(EasySummonConfig.FrameWidth + 280)
+			self.inset:SetWidth(EasySummonConfig.FrameWidth - 18)
+		end
+
 		if EasySummonSettingsWindow and EasySummonSettingsWindow.RefreshPhraseList then
 			EasySummonSettingsWindow:RefreshPhraseList()
 		end
+	end
+end
+
+function EasySummonUI:ToggleViewMode()
+	-- Close settings panel if it's open
+	if self.settingsExpanded then
+		self:ToggleSettings() -- Use the toggle function to properly close settings
+	end
+
+	-- Hide summon button when switching views
+	if EasySummonSummonButton and EasySummonSummonButton.button then
+		EasySummonSummonButton.button:Hide()
+		EasySummonSummonButton.button = nil
+	end
+
+	-- Reset scroll position to top
+	if self.scrollFrame then
+		self.scrollFrame:SetVerticalScroll(0)
+	end
+
+	if self.viewMode == "list" then
+		self.viewMode = "grid"
+		self.viewToggleButton:SetText("List View")
+		self:ResizeForGridView()
+	else
+		self.viewMode = "list"
+		self.viewToggleButton:SetText("Grid View")
+		self:ResizeForListView()
+	end
+
+	-- Save view mode preference
+	EasySummonConfig.ViewMode = self.viewMode
+
+	-- Update the raid list with the new view mode
+	if _G.EasySummonCore then
+		_G.EasySummonCore:UpdateRaidList()
+	end
+end
+
+function EasySummonUI:ResizeForGridView()
+	-- Resize frame to fit party grid layout
+	-- Match the actual dimensions from UpdateGridView
+	local cellWidth = 155
+	local cellHeight = 30
+	local cellPadding = 4
+	local partySpacing = 4
+	local rowSpacing = 20
+
+	-- Each party is 5 players vertically
+	local partyHeight = (cellHeight * 5) + (cellPadding * 4)
+	local partyWidth = cellWidth
+
+	-- Width: 4 parties + spacing + margins + scrollbar
+	local frameWidth = (partyWidth * 4) + (partySpacing * 3) + 8 + 40
+	-- Height: Match list view height
+	local frameHeight = EasySummonConfig.FrameHeight
+
+	self.frame:SetSize(frameWidth, frameHeight)
+	self.inset:SetWidth(frameWidth - 18)
+
+	-- Switch to wide background texture
+	if self.bgTexture then
+		self.bgTexture:SetTexture("Interface\\AddOns\\EasySummon\\Textures\\artwide")
+	end
+end
+
+function EasySummonUI:ResizeForListView()
+	-- Restore original size
+	self.frame:SetSize(EasySummonConfig.FrameWidth, EasySummonConfig.FrameHeight)
+	self.inset:SetWidth(EasySummonConfig.FrameWidth - 18)
+
+	-- Switch to regular background texture
+	if self.bgTexture then
+		self.bgTexture:SetTexture("Interface\\AddOns\\EasySummon\\Textures\\art")
 	end
 end
 

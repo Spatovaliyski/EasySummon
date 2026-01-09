@@ -1,11 +1,12 @@
--- Config.lua
--- Default configuration
 local defaults = {
 	-- UI settings
 	FrameWidth = 390,
 	FrameHeight = 500,
 
 	NotifyWhenHidden = false,
+
+	-- View mode ("list" or "grid")
+	ViewMode = "list",
 
 	-- Summoning keywords (default list + custom ones added by player)
 	SummonKeywords = {

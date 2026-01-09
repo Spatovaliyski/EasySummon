@@ -1,4 +1,3 @@
--- Core.lua
 EasySummon = {}
 EasySummon.__index = EasySummon
 
@@ -75,9 +74,7 @@ function EasySummon:ResetResponse(playerName)
 	end
 end
 
--- Define a placeholder UpdateRaidList method
 function EasySummon:UpdateRaidList()
-	-- Will be overridden by RaidList.lua
 	if EasySummonRaidList and EasySummonRaidList.UpdateList then
 		EasySummonRaidList:UpdateList(self.playerResponses)
 	end

@@ -1,4 +1,3 @@
--- UI/SettingsWindow.lua
 EasySummonSettingsWindow = {}
 
 function EasySummonSettingsWindow:Initialize()

@@ -1,4 +1,3 @@
--- Toast Notification for EasySummon
 EasySummonToast = {}
 
 function EasySummonToast:Initialize()
