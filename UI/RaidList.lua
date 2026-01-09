@@ -675,19 +675,19 @@ function EasySummonRaidList:UpdateFilledGridSlot(buttonFrame, member, playerResp
 		if isSummoned then
 			textOpacity = 0.7
 			clickable = false
-			showGreenOverlay = true
+			showGreenOverlay = false
 		elseif eligibleForSummonRequest then
 			textOpacity = 1.0
 			clickable = true
 		end
 	end
 
-	-- Set subtle background with green tint if summoned
 	if showGreenOverlay then
 		buttonFrame:SetBackdropColor(0, 0.3, 0, 0.2)
+	elseif isSummoned then
+		buttonFrame:SetBackdropColor(0.3, 0.3, 0, 0.2)
 	elseif clickable then
 		buttonFrame:SetBackdropColor(0.15, 0.15, 0.15, 0.3)
-		-- Otherwise keep the alternating background set during positioning
 	end
 
 	-- Set name with class color
@@ -732,7 +732,7 @@ function EasySummonRaidList:UpdateFilledGridSlot(buttonFrame, member, playerResp
 			if hasAnswered and eligibleForSummonRequest then
 				GameTooltip:AddLine("Summon Requested", 1, 1, 0)
 			elseif isSummoned then
-				GameTooltip:AddLine("Summoned", 0, 1, 0)
+				GameTooltip:AddLine("Summoned", 1, 1, 0)
 			end
 			GameTooltip:Show()
 		end)
@@ -755,7 +755,7 @@ function EasySummonRaidList:UpdateFilledGridSlot(buttonFrame, member, playerResp
 			GameTooltip:SetText(displayName, classColor.r, classColor.g, classColor.b)
 			GameTooltip:AddLine(member.zone, 1, 1, 1)
 			if isSummoned then
-				GameTooltip:AddLine("Summoned", 0, 1, 0)
+				GameTooltip:AddLine("Summoned", 1, 1, 0)
 			end
 			GameTooltip:Show()
 		end)
