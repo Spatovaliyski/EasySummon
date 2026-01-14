@@ -33,7 +33,7 @@ function EasySummonUI:CreateMainFrame()
 	tinsert(UISpecialFrames, "EasySummonFrame")
 
 	-- Set the frame title
-	frame.TitleText:SetText("Easy Summon v" .. GetAddOnMetadata("EasySummon", "Version"))
+	frame.TitleText:SetText("Easy Summon v" .. C_AddOns.GetAddOnMetadata("EasySummon", "Version"))
 	frame.portrait:SetTexture("Interface\\AddOns\\EasySummon\\Textures\\logo")
 
 	-- Settings button (next to close button)
