@@ -77,39 +77,39 @@ function EasySummonSettingsWindow:RefreshPhraseList()
 
 			local backgroundTexture = button:CreateTexture(nil, "BACKGROUND")
 			backgroundTexture:SetAllPoints(button)
-		backgroundTexture:SetTexture("Interface\\QuestFrame\\UI-QuestLogTitleHighlight")
-		backgroundTexture:SetBlendMode("ADD")
-		backgroundTexture:SetAlpha(0)
-		button.backgroundTexture = backgroundTexture
+			backgroundTexture:SetTexture("Interface\\QuestFrame\\UI-QuestLogTitleHighlight")
+			backgroundTexture:SetBlendMode("ADD")
+			backgroundTexture:SetAlpha(0)
+			button.backgroundTexture = backgroundTexture
 
-		local phraseText = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-		phraseText:SetPoint("LEFT", button, "LEFT", 5, 0)
-		phraseText:SetWidth(210)
-		phraseText:SetJustifyH("LEFT")
-		button.phraseText = phraseText
+			local phraseText = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+			phraseText:SetPoint("LEFT", button, "LEFT", 5, 0)
+			phraseText:SetWidth(210)
+			phraseText:SetJustifyH("LEFT")
+			button.phraseText = phraseText
 
-		button:SetScript("OnClick", function(self, mouseButton)
-			EasySummonSettingsWindow:RemovePhrase(self.phraseData)
-		end)
+			button:SetScript("OnClick", function(self, mouseButton)
+				EasySummonSettingsWindow:RemovePhrase(self.phraseData)
+			end)
 
-		button:SetScript("OnEnter", function(self)
-			self.phraseText:SetTextColor(1, 1, 1, 1)
-			self.backgroundTexture:SetAlpha(0.15)
-			SetCursor("INTERACT_CURSOR")
-		end)
+			button:SetScript("OnEnter", function(self)
+				self.phraseText:SetTextColor(1, 1, 1, 1)
+				self.backgroundTexture:SetAlpha(0.15)
+				SetCursor("INTERACT_CURSOR")
+			end)
 
-		button:SetScript("OnLeave", function(self)
-			self.phraseText:SetTextColor(0.8, 0.8, 0.8, 1)
-			self.backgroundTexture:SetAlpha(0)
-			ResetCursor()
-		end)
+			button:SetScript("OnLeave", function(self)
+				self.phraseText:SetTextColor(0.8, 0.8, 0.8, 1)
+				self.backgroundTexture:SetAlpha(0)
+				ResetCursor()
+			end)
 
-		self.phraseButtons[i] = button
-	end
+			self.phraseButtons[i] = button
+		end
 
 		button:SetPoint("TOPLEFT", listContainer, "TOPLEFT", 0, -(yOffset + 1))
-		button.phraseText:SetText('• "' .. phrase .. '"')	
-		button.phraseText:SetTextColor(1, 1, 1, 1)		
+		button.phraseText:SetText('• "' .. phrase .. '"')
+		button.phraseText:SetTextColor(1, 1, 1, 1)
 		button.phraseData = phrase
 
 		button:Show()

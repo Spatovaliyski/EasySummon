@@ -168,21 +168,22 @@ function EasySummonRaidList:UpdateListView(playerResponses)
 		if playerInInstance then
 			-- Player IS in instance
 			if inPVPInstance then
-				-- If Player is in instance and Member is in instance and in range but in battleground
+				-- PVP instances don't allow summoning
 				statusText = "In PVP Instance"
 				clickable = false
 				textOpacity = 0.7
 			elseif not member.isInInstance then
-				-- If Player in instance but Member is not in instance
+				-- Player in instance, Member outside - TBC allows summoning
 				statusText = "Not Instanced"
-				clickable = false
+				clickable = true
+				textOpacity = 1.0
 			elseif not member.inRange then
-				-- If Player is in instance and Member is in instance but not in range
+				-- Both in instance but not in range - can summon
 				statusText = ""
 				clickable = true
 				textOpacity = 1.0
 			else
-				-- If Player is in instance and Member is in instance and in range
+				-- Both in instance and in range - no need to summon
 				statusText = ""
 				clickable = false
 				if hasAnswered then
@@ -192,18 +193,19 @@ function EasySummonRaidList:UpdateListView(playerResponses)
 		else
 			-- Player is NOT in instance
 			if member.isInInstance then
+				-- Player outside, Member in instance - TBC allows summoning
 				statusText = "Instanced"
-				textOpacity = 0.7
-				clickable = false
+				clickable = true
+				textOpacity = 1.0
 			elseif member.inRange then
-				-- If Player is not in instance and Member is not in instance but in range
+				-- Both outside instance and in range - no need to summon
 				statusText = ""
 				clickable = false
 				if hasAnswered then
 					isSummoned = true -- They requested summon but are now in range
 				end
 			else
-				-- If Player is not in instance and Member is not in instance but not in range
+				-- Both outside instance and not in range - can summon
 				statusText = ""
 				clickable = true
 				textOpacity = 1.0
@@ -542,9 +544,9 @@ function EasySummonRaidList:UpdateGridView(playerResponses)
 			-- Set alternating party background for visual separation
 			-- Odd parties (1,3,5,7) get slightly darker background
 			if groupNum % 2 == 1 then
-				buttonFrame:SetBackdropColor(0, 0, 0, 0.15)
+				buttonFrame:SetBackdropColor(0, 0, 0, 0.3)
 			else
-				buttonFrame:SetBackdropColor(0, 0, 0, 0.05)
+				buttonFrame:SetBackdropColor(0, 0, 0, 0.3)
 			end
 
 			if member then
@@ -627,14 +629,19 @@ function EasySummonRaidList:UpdateFilledGridSlot(buttonFrame, member, playerResp
 
 	if playerInInstance then
 		if inPVPInstance then
+			-- PVP instances don't allow summoning
 			clickable = false
 			textOpacity = 0.7
 		elseif not member.isInInstance then
-			clickable = false
+			-- Player in instance, Member outside - TBC allows summoning
+			clickable = true
+			textOpacity = 1.0
 		elseif not member.inRange then
+			-- Both in instance but not in range - can summon
 			clickable = true
 			textOpacity = 1.0
 		else
+			-- Both in instance and in range - no need to summon
 			clickable = false
 			if hasAnswered then
 				isSummoned = true
@@ -643,15 +650,18 @@ function EasySummonRaidList:UpdateFilledGridSlot(buttonFrame, member, playerResp
 		end
 	else
 		if member.isInInstance then
-			textOpacity = 0.7
-			clickable = false
+			-- Player outside, Member in instance - TBC allows summoning
+			clickable = true
+			textOpacity = 1.0
 		elseif member.inRange then
+			-- Both outside instance and in range - no need to summon
 			clickable = false
 			if hasAnswered then
 				isSummoned = true
 				showGreenOverlay = true
 			end
 		else
+			-- Both outside instance and not in range - can summon
 			clickable = true
 			textOpacity = 1.0
 		end
