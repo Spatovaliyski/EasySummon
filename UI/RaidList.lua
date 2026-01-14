@@ -173,9 +173,9 @@ function EasySummonRaidList:UpdateListView(playerResponses)
 				clickable = false
 				textOpacity = 0.7
 			elseif not member.isInInstance then
-				-- Player in instance, Member outside - TBC allows summoning
+				-- Player in instance, Member outside
 				statusText = "Not Instanced"
-				clickable = true
+				clickable = false
 				textOpacity = 1.0
 			elseif not member.inRange then
 				-- Both in instance but not in range - can summon
@@ -193,9 +193,9 @@ function EasySummonRaidList:UpdateListView(playerResponses)
 		else
 			-- Player is NOT in instance
 			if member.isInInstance then
-				-- Player outside, Member in instance - TBC allows summoning
+				-- Player outside, Member in instance
 				statusText = "Instanced"
-				clickable = true
+				clickable = false
 				textOpacity = 1.0
 			elseif member.inRange then
 				-- Both outside instance and in range - no need to summon
@@ -633,9 +633,8 @@ function EasySummonRaidList:UpdateFilledGridSlot(buttonFrame, member, playerResp
 			clickable = false
 			textOpacity = 0.7
 		elseif not member.isInInstance then
-			-- Player in instance, Member outside - TBC allows summoning
-			clickable = true
-			textOpacity = 1.0
+			-- Player in instance, Member outside // TBC
+			clickable = false
 		elseif not member.inRange then
 			-- Both in instance but not in range - can summon
 			clickable = true
@@ -650,9 +649,8 @@ function EasySummonRaidList:UpdateFilledGridSlot(buttonFrame, member, playerResp
 		end
 	else
 		if member.isInInstance then
-			-- Player outside, Member in instance - TBC allows summoning
-			clickable = true
-			textOpacity = 1.0
+			-- Player outside, Member in instance // TBC
+			clickable = false
 		elseif member.inRange then
 			-- Both outside instance and in range - no need to summon
 			clickable = false

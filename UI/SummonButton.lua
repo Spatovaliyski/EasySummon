@@ -65,6 +65,9 @@ function EasySummonSummonButton:CreateSummonButton(name, macroText, anchorFrame)
 		button:SetPoint("CENTER", scrollFrame, "CENTER", 0, 0)
 	end
 
+	button:SetMouseClickEnabled(true)
+	button:RegisterForClicks("LeftButtonUp", "LeftButtonDown")
+
 	-- Set attributes for macro functionality
 	button:SetAttribute("type", "macro")
 	button:SetAttribute("macrotext", macroText)
