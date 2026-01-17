@@ -229,12 +229,22 @@ function EasySummonUI:CreateSettingsPanel()
 		EasySummonConfig.NotifyWhenHidden = self:GetChecked()
 	end)
 
+	-- Sound checkbox
+	local soundCheckbox = CreateFrame("CheckButton", "EasySummonSoundCheckbox", settingsPanel, "UICheckButtonTemplate")
+	soundCheckbox:SetSize(24, 24)
+	soundCheckbox:SetPoint("TOPLEFT", notifyCheckbox, "BOTTOMLEFT", 0, -5)
+	soundCheckbox:SetChecked(EasySummonConfig.PlaySoundOnSummon)
+	_G[soundCheckbox:GetName() .. "Text"]:SetText("Play sound for summon request")
+	soundCheckbox:SetScript("OnClick", function(self)
+		EasySummonConfig.PlaySoundOnSummon = self:GetChecked()
+	end)
+
 	-- Divider
 	local divider = settingsPanel:CreateTexture(nil, "ARTWORK")
 	divider:SetHeight(1)
 	divider:SetPoint("LEFT", 15, 0)
 	divider:SetPoint("RIGHT", -15, 0)
-	divider:SetPoint("TOP", notifyCheckbox, "BOTTOM", 0, -5)
+	divider:SetPoint("TOP", soundCheckbox, "BOTTOM", 0, -5)
 	divider:SetColorTexture(0.3, 0.3, 0.3, 1)
 
 	-- Keywords section title
@@ -279,7 +289,7 @@ function EasySummonUI:CreateSettingsPanel()
 	local keywordsInset = CreateFrame("Frame", nil, settingsPanel, "InsetFrameTemplate3")
 	keywordsInset:SetPoint("TOPLEFT", instructionsText, "BOTTOMLEFT", 0, -5)
 	keywordsInset:SetPoint("TOPRIGHT", settingsPanel, "TOPRIGHT", -10, 0)
-	keywordsInset:SetHeight(244)
+	keywordsInset:SetHeight(224)
 
 	local keywordsScroll =
 		CreateFrame("ScrollFrame", "EasySummonKeywordsScrollFrame", keywordsInset, "UIPanelScrollFrameTemplate")
@@ -358,7 +368,7 @@ function EasySummonUI:CreateSettingsPanel()
 
 	-- Import button below keywords list
 	local importLabel = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	importLabel:SetPoint("TOPLEFT", keywordsInset, "BOTTOMLEFT", 5, -10)
+	importLabel:SetPoint("TOPLEFT", keywordsInset, "BOTTOMLEFT", 5, -7)
 	importLabel:SetTextColor(0.7, 0.7, 0.7)
 	importLabel:SetText("Import common keywords:")
 

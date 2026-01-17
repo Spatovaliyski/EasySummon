@@ -1,16 +1,10 @@
-lightweight tag 13666c2acbd918c6a3bbd2d4055dc34eae7894e2 2.0.2
+lightweight tag 40bc663f0d6026c6f0d2942d5ef50ffccfcb57bd 2.0.3
 Author:	Spatovaliyski <martinspatovaliyski@gmail.com>
-Date:	Wed Jan 14 11:10:31 2026 +0200
+Date:	Wed Jan 14 23:21:32 2026 +0200
 
-commit 13666c2acbd918c6a3bbd2d4055dc34eae7894e2
+commit 40bc663f0d6026c6f0d2942d5ef50ffccfcb57bd
 Author: Spatovaliyski <martinspatovaliyski@gmail.com>
-Date:   Wed Jan 14 11:10:31 2026 +0200
+Date:   Wed Jan 14 23:21:32 2026 +0200
 
-    Bump assets
-
-commit 83d235da57579bd4e2802e25ea047171ba846ac8
-Author: Spatovaliyski <martinspatovaliyski@gmail.com>
-Date:   Wed Jan 14 11:10:08 2026 +0200
-
-    Fix load
+    Fix click
 

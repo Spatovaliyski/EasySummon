@@ -4,6 +4,7 @@ local defaults = {
 	FrameHeight = 500,
 
 	NotifyWhenHidden = false,
+	PlaySoundOnSummon = true,
 
 	-- View mode ("list" or "grid")
 	ViewMode = "list",

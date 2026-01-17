@@ -100,7 +100,9 @@ function EasySummon:CheckForSummonRequest(event, msg, sender)
 				end
 			else
 				-- Just play sound if window is open
-				PlaySound(SOUNDKIT.READY_CHECK, "Dialog")
+				if EasySummonConfig.PlaySoundOnSummon then
+					PlaySound(SOUNDKIT.READY_CHECK, "Dialog")
+				end
 			end
 
 			-- Only update raid list if active

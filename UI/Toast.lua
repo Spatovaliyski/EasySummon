@@ -173,5 +173,7 @@ function EasySummonToast:Show(playerName)
 	-- Show the frame
 	self.frame:Show()
 
-	PlaySound(SOUNDKIT.READY_CHECK, "Dialog")
+	if EasySummonConfig.PlaySoundOnSummon then
+		PlaySound(SOUNDKIT.READY_CHECK, "Dialog")
+	end
 end
