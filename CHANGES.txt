@@ -1,10 +1,10 @@
-lightweight tag 40bc663f0d6026c6f0d2942d5ef50ffccfcb57bd 2.0.3
+lightweight tag 46d8fa067d6fa7f6eb9d4452daa954d0e133639e 2.0.4
 Author:	Spatovaliyski <martinspatovaliyski@gmail.com>
-Date:	Wed Jan 14 23:21:32 2026 +0200
+Date:	Sun Jan 18 01:46:51 2026 +0200
 
-commit 40bc663f0d6026c6f0d2942d5ef50ffccfcb57bd
+commit 46d8fa067d6fa7f6eb9d4452daa954d0e133639e
 Author: Spatovaliyski <martinspatovaliyski@gmail.com>
-Date:   Wed Jan 14 23:21:32 2026 +0200
+Date:   Sun Jan 18 01:46:51 2026 +0200
 
-    Fix click
+    Add notification sound option
 

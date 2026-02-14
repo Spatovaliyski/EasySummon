@@ -1,28 +1,53 @@
 EasySummonSummonButton = {
 	button = nil,
+	summonInProgress = false,
 }
 
+-- Track summon cast state to prevent spam
+local summonCastTracker = CreateFrame("Frame")
+summonCastTracker:RegisterEvent("UNIT_SPELLCAST_START")
+summonCastTracker:RegisterEvent("UNIT_SPELLCAST_STOP")
+summonCastTracker:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+summonCastTracker:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+
+summonCastTracker:SetScript("OnEvent", function(self, event, unit, castGUID, spellId)
+	if unit ~= "player" then
+		return
+	end
+
+	if event == "UNIT_SPELLCAST_START" then
+		-- Ritual of Summoning: 698
+		if spellId == 698 then
+			EasySummonSummonButton.summonInProgress = true
+		end
+	elseif event == "UNIT_SPELLCAST_CHANNEL_START" then
+		-- Ritual of Summoning (channel): 46546
+		if spellId == 46546 then
+			if UnitExists("target") and UnitIsPlayer("target") and not UnitIsUnit("target", "player") then
+				local targetName = GetUnitName("target", true) or GetUnitName("target")
+				if targetName then
+					EasySummonMessages:AnnounceChannelStart(targetName)
+				end
+			end
+		end
+	elseif event == "UNIT_SPELLCAST_STOP" or event == "UNIT_SPELLCAST_INTERRUPTED" then
+		if spellId == 698 then
+			EasySummonSummonButton.summonInProgress = false
+		end
+	end
+end)
+
 function EasySummonSummonButton:DoSummon(name, anchorFrame)
+	-- Prevent spam if summon is already in progress
+	if self.summonInProgress then
+		return
+	end
 	local channel = IsInRaid() and "RAID" or "PARTY"
 
 	-- Create macro for summoning
 	local macroName = "SH_Summon"
 	local macroIcon = "INV_MISC_QUESTIONMARK"
-	local macroText
-
-	if channel == "RAID" then
-		macroText = "/targetexact "
-			.. name
-			.. "\n/cast Ritual of Summoning\n/raid [EasySummon]: Summoning "
-			.. name
-			.. ", please click!"
-	else
-		macroText = "/targetexact "
-			.. name
-			.. "\n/cast Ritual of Summoning\n/party [EasySummon]: Summoning "
-			.. name
-			.. ", please click!"
-	end
+	local macroText = "/targetexact " .. name .. "\n/cast Ritual of Summoning"
 
 	local macroIndex = GetMacroIndexByName(macroName)
 	if macroIndex > 0 then
